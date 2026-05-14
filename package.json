@@ -1,0 +1,12 @@
+{
+  "name": "mario0318-site",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Standalone static site for mario0318.com",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
