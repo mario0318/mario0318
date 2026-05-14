@@ -18,6 +18,30 @@ html, body {
   user-select: none;
 }
 canvas { display: block; position: fixed; inset: 0; cursor: default; }
+#legend {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(78vmin, 560px);
+  height: min(78vmin, 560px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.legend-label {
+  position: absolute;
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Mono', monospace;
+  font-size: clamp(0.58rem, 1.4vw, 0.8rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.34);
+  transform: translate(-50%, -50%);
+  transition: color 160ms ease, opacity 160ms ease, transform 160ms ease;
+  white-space: nowrap;
+}
+.legend-label.active {
+  color: rgba(255,255,255,0.86);
+  transform: translate(-50%, -50%) scale(1.04);
+}
 #ts {
   position: fixed;
   bottom: max(1.75rem, env(safe-area-inset-bottom, 1.75rem));
@@ -30,12 +54,115 @@ canvas { display: block; position: fixed; inset: 0; cursor: default; }
   pointer-events: none;
   white-space: nowrap;
 }
+.anchor-hotspot {
+  position: fixed;
+  z-index: 4;
+  width: 120px;
+  height: 64px;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.4);
+  font: 0.68rem ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.anchor-hotspot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid transparent;
+  background: transparent;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.anchor-hotspot:focus-visible {
+  outline: 1px solid rgba(255,255,255,0.8);
+  outline-offset: 6px;
+}
+.anchor-hotspot:hover::before,
+.anchor-hotspot:focus-visible::before,
+.anchor-hotspot.active::before {
+  border-color: color-mix(in srgb, var(--anchor-color) 65%, transparent);
+  background: color-mix(in srgb, var(--anchor-color) 10%, transparent);
+}
+.cluster-menu {
+  position: fixed;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.42rem;
+  width: min(280px, 82vw);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.cluster-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.cluster-menu a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--menu-color) 34%, transparent);
+  background: rgba(10,12,16,0.74);
+  color: rgba(255,255,255,0.86);
+  text-decoration: none;
+  font: 0.66rem ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+.cluster-menu a:hover,
+.cluster-menu a:focus-visible {
+  color: #fff;
+  border-color: var(--menu-color);
+  outline: none;
+}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
+<div id="legend" aria-hidden="true">
+  <div class="legend-label" id="legend-blue">mario0318</div>
+  <div class="legend-label" id="legend-green">raul3</div>
+  <div class="legend-label" id="legend-gray">reach</div>
+</div>
+<button class="anchor-hotspot" id="hotspot-blue" style="--anchor-color:#4db8ff" type="button" aria-label="Show mario0318 links"></button>
+<button class="anchor-hotspot" id="hotspot-green" style="--anchor-color:#55e09a" type="button" aria-label="Show raul3 links"></button>
+<button class="anchor-hotspot" id="hotspot-gray" style="--anchor-color:#9ab4c6" type="button" aria-label="Show reach links"></button>
+<nav class="cluster-menu" id="menu-blue" style="--menu-color:#4db8ff" aria-label="mario0318 links">
+  <a href="https://www.youtube.com/@mario0318">YouTube</a>
+  <a href="https://tiktok.com/@mariozed318">TikTok</a>
+  <a href="https://soundcloud.com/mario0318">SoundCloud</a>
+  <a href="https://instagram.com/mario00318">Instagram</a>
+  <a href="https://x.com/mario0318">X</a>
+  <a href="https://github.com/mario0318">Code</a>
+</nav>
+<nav class="cluster-menu" id="menu-green" style="--menu-color:#55e09a" aria-label="project links">
+  <a href="https://sprime.io">Sprime</a>
+  <a href="https://raul3.com">Raul3</a>
+  <a href="https://dapp.cam">dapp.cam</a>
+  <a href="https://fairchildalchemy.com">Fairchild</a>
+</nav>
+<nav class="cluster-menu" id="menu-gray" style="--menu-color:#9ab4c6" aria-label="contact links">
+  <a href="mailto:mario0318@gmail.com">Email</a>
+  <a href="https://linktr.ee/mario0318">Linktree</a>
+  <a href="https://www.amazon.com/shop/mario0318@gmail.com">Amazon</a>
+</nav>
 <div id="ts"></div>
 <script>
+// ── WORLD DATA ───────────────────────────────────────────────────────────────
 const WORLDS = [
   {
     id: 'blue', color: '#4db8ff',
@@ -91,6 +218,8 @@ const WORLDS = [
     ]
   }
 ];
+
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
 const BG             = '#0a0c10';
 const BASE_RATE      = (2 * Math.PI) / 86400000;
 const DECAY_HL       = 90000;
@@ -98,6 +227,8 @@ const THRESH_DRIFT   = 2;
 const THRESH_CHARGED = 32;
 const THRESH_PORTAL  = 512;
 const MAX_MULT       = 131072;
+
+// ── STATE ────────────────────────────────────────────────────────────────────
 let angle         = 0;
 let speedMult     = 1;
 let lastTime      = null;
@@ -106,9 +237,29 @@ let ripples       = [];
 let orbitAngles   = WORLDS.map(() => Math.random() * Math.PI * 2);
 let expandedGroup = null;
 let hoverTarget   = null;
+let activeWorldIdx = null;
+
+// ── CANVAS ───────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
+const legend = {
+  blue: document.getElementById('legend-blue'),
+  green: document.getElementById('legend-green'),
+  gray: document.getElementById('legend-gray')
+};
+const hotspots = {
+  blue: document.getElementById('hotspot-blue'),
+  green: document.getElementById('hotspot-green'),
+  gray: document.getElementById('hotspot-gray')
+};
+const menus = {
+  blue: document.getElementById('menu-blue'),
+  green: document.getElementById('menu-green'),
+  gray: document.getElementById('menu-gray')
+};
+let domHoverWorldIdx = null;
 let W, H, cx, cy, TR, dotR;
+
 function resize() {
   W  = canvas.width  = window.innerWidth;
   H  = canvas.height = window.innerHeight;
@@ -119,25 +270,31 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 resize();
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
 function getState() {
   if (speedMult < THRESH_DRIFT)   return 'still';
   if (speedMult < THRESH_CHARGED) return 'drift';
   if (speedMult < THRESH_PORTAL)  return 'charged';
   return 'portal';
 }
+
 function getCDR() {
   if (speedMult < THRESH_CHARGED) return dotR;
   const t = Math.min(1, (speedMult - THRESH_CHARGED) / (THRESH_PORTAL * 3 - THRESH_CHARGED));
   return dotR * (1 + 2.5 * t);
 }
+
 function getGlow() {
   if (speedMult < THRESH_CHARGED) return 0;
   return Math.min(1, (speedMult - THRESH_CHARGED) / (THRESH_PORTAL - THRESH_CHARGED));
 }
+
 function dotPos(world) {
   const a = world.baseAngle + angle;
   return { x: cx + Math.cos(a) * TR, y: cy + Math.sin(a) * TR };
 }
+
 function nodePos(wi, ni) {
   const world = WORLDS[wi];
   const cdr   = getCDR();
@@ -147,6 +304,27 @@ function nodePos(wi, ni) {
   const dp    = dotPos(world);
   return { x: dp.x + Math.cos(oa) * orR, y: dp.y + Math.sin(oa) * orR };
 }
+
+function getRenderNodes(world) {
+  const nodes = [];
+  world.nodes.forEach((node) => {
+    if (node.isGroup) {
+      node.children.forEach((child) => {
+        nodes.push({
+          label: child.label,
+          href: child.href,
+          color: node.color || world.color,
+          placeholder: false,
+          groupChild: true
+        });
+      });
+      return;
+    }
+    nodes.push(node);
+  });
+  return nodes;
+}
+
 function childPos(wi, ni, ci) {
   if (!expandedGroup || expandedGroup.worldIdx !== wi || expandedGroup.nodeIdx !== ni) return null;
   const np  = nodePos(wi, ni);
@@ -155,11 +333,71 @@ function childPos(wi, ni, ci) {
   const cr  = Math.max(38, cdr * 3.2);
   return { x: np.x + Math.cos(coa) * cr, y: np.y + Math.sin(coa) * cr };
 }
+
 function d2(ax, ay, bx, by) {
   return Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
 }
+
+function getHoverWorldIdx() {
+  if (domHoverWorldIdx !== null) return domHoverWorldIdx;
+  if (!hoverTarget) return null;
+  return hoverTarget.worldIdx ?? null;
+}
+
+function getVisibleWorlds() {
+  if (getState() === 'portal') return WORLDS.map((_, index) => index);
+  const hoverWorldIdx = getHoverWorldIdx();
+  if (hoverWorldIdx !== null) return [hoverWorldIdx];
+  if (expandedGroup) return [expandedGroup.worldIdx];
+  if (activeWorldIdx !== null) return [activeWorldIdx];
+  return [];
+}
+
+function updateLegend() {
+  WORLDS.forEach((world) => {
+    const label = legend[world.id];
+    if (!label) return;
+    const p = dotPos(world);
+    let dx = 0;
+    let dy = 0;
+    if (world.id === 'blue') dy = -28;
+    if (world.id === 'green') { dx = -62; dy = 10; }
+    if (world.id === 'gray') { dx = 62; dy = 10; }
+    label.style.left = `${p.x + dx}px`;
+    label.style.top = `${p.y + dy}px`;
+    const active = getVisibleWorlds().includes(WORLDS.indexOf(world)) || hoverTarget?.worldIdx === WORLDS.indexOf(world) || domHoverWorldIdx === WORLDS.indexOf(world);
+    label.classList.toggle('active', active);
+  });
+}
+
+function setMenuOpen(worldId, isOpen) {
+  hotspots[worldId]?.classList.toggle('active', isOpen);
+  menus[worldId]?.classList.toggle('active', isOpen);
+}
+
+function positionDomOverlays() {
+  WORLDS.forEach((world, wi) => {
+    const hotspot = hotspots[world.id];
+    const menu = menus[world.id];
+    if (!hotspot || !menu) return;
+
+    const p = dotPos(world);
+    hotspot.style.left = `${p.x}px`;
+    hotspot.style.top = `${p.y}px`;
+
+    const menuYOffset = world.id === 'blue' ? -94 : 94;
+    const menuXOffset = world.id === 'green' ? -56 : world.id === 'gray' ? 56 : 0;
+    menu.style.left = `${p.x + menuXOffset}px`;
+    menu.style.top = `${p.y + menuYOffset}px`;
+
+    setMenuOpen(world.id, getVisibleWorlds().includes(wi) || domHoverWorldIdx === wi);
+  });
+}
+
+// ── HIT TEST ─────────────────────────────────────────────────────────────────
 function hitTest(px, py) {
   const cdr = getCDR();
+
   if (expandedGroup) {
     const { worldIdx: wi, nodeIdx: ni, children } = expandedGroup;
     for (let ci = 0; ci < children.length; ci++) {
@@ -168,21 +406,26 @@ function hitTest(px, py) {
         return { type: 'child', worldIdx: wi, nodeIdx: ni, childIdx: ci };
     }
   }
+
   for (let wi = 0; wi < WORLDS.length; wi++) {
-    const nc = WORLDS[wi].nodes.length;
+    const renderNodes = getRenderNodes(WORLDS[wi]);
+    const nc = renderNodes.length;
     for (let ni = 0; ni < nc; ni++) {
       const np = nodePos(wi, ni);
       if (d2(px, py, np.x, np.y) < cdr * 1.15)
         return { type: 'node', worldIdx: wi, nodeIdx: ni };
     }
   }
+
   for (let wi = 0; wi < WORLDS.length; wi++) {
     const dp = dotPos(WORLDS[wi]);
-    if (d2(px, py, dp.x, dp.y) < cdr * 1.3)
+    if (d2(px, py, dp.x, dp.y) < Math.max(cdr * 3.4, 26))
       return { type: 'dot', worldIdx: wi };
   }
+
   return null;
 }
+
 function handleHit(hit) {
   if (hit.type === 'child') {
     const child = expandedGroup?.children[hit.childIdx];
@@ -190,22 +433,9 @@ function handleHit(hit) {
     return;
   }
   if (hit.type === 'node') {
-    const node = WORLDS[hit.worldIdx].nodes[hit.nodeIdx];
+    const node = getRenderNodes(WORLDS[hit.worldIdx])[hit.nodeIdx];
     if (node.placeholder) return;
-    if (node.isGroup) {
-      const same = expandedGroup?.worldIdx === hit.worldIdx && expandedGroup?.nodeIdx === hit.nodeIdx;
-      if (same) {
-        expandedGroup = null;
-      } else {
-        const n = node.children.length;
-        expandedGroup = {
-          worldIdx: hit.worldIdx, nodeIdx: hit.nodeIdx,
-          children: node.children,
-          baseChildAngles: node.children.map((_, i) => (i / n) * Math.PI * 2),
-          orbitOffset: 0
-        };
-      }
-    } else if (node.href) {
+    if (node.href) {
       window.open(node.href, '_blank', 'noreferrer');
     }
     return;
@@ -213,26 +443,78 @@ function handleHit(hit) {
   if (hit.type === 'dot' && hit.worldIdx === 1)
     window.open('https://raul3.com', '_blank', 'noreferrer');
 }
+
+// ── INPUT ────────────────────────────────────────────────────────────────────
 function onPointerDown(e) {
   e.preventDefault();
   const px = e.clientX ?? e.touches?.[0]?.clientX;
   const py = e.clientY ?? e.touches?.[0]?.clientY;
   if (px == null) return;
-  if (getState() === 'portal') {
-    const hit = hitTest(px, py);
-    if (hit) { handleHit(hit); ripples.push({ x: px, y: py, r: 0, alpha: 0.5 }); return; }
+
+  const hit = hitTest(px, py);
+  if (hit) {
+    if (hit.type === 'dot') {
+      activeWorldIdx = activeWorldIdx === hit.worldIdx ? null : hit.worldIdx;
+      expandedGroup = null;
+      ripples.push({ x: px, y: py, r: 0, alpha: 0.5 });
+      return;
+    }
+    handleHit(hit);
+    ripples.push({ x: px, y: py, r: 0, alpha: 0.5 });
+    return;
   }
+
   speedMult = Math.min(speedMult * 2, MAX_MULT);
   lastDecay = performance.now();
   ripples.push({ x: px, y: py, r: 0, alpha: 0.55 });
 }
+
 function onMouseMove(e) {
-  if (getState() !== 'portal') { hoverTarget = null; canvas.style.cursor = 'default'; return; }
   hoverTarget = hitTest(e.clientX, e.clientY);
   canvas.style.cursor = hoverTarget ? 'pointer' : 'default';
 }
+
+function onPointerLeave() {
+  hoverTarget = null;
+  canvas.style.cursor = 'default';
+}
+
 canvas.addEventListener('pointerdown', onPointerDown, { passive: false });
 canvas.addEventListener('mousemove',   onMouseMove);
+canvas.addEventListener('mouseleave',  onPointerLeave);
+
+WORLDS.forEach((world, wi) => {
+  const hotspot = hotspots[world.id];
+  const menu = menus[world.id];
+  const open = () => {
+    domHoverWorldIdx = wi;
+    activeWorldIdx = wi;
+    expandedGroup = null;
+  };
+  const close = () => {
+    window.setTimeout(() => {
+      const activeEl = document.activeElement;
+      if (hotspot?.matches(':hover') || menu?.matches(':hover') || hotspot === activeEl || menu?.contains(activeEl)) return;
+      if (domHoverWorldIdx === wi) domHoverWorldIdx = null;
+    }, 0);
+  };
+
+  [hotspot, menu].forEach((el) => {
+    if (!el) return;
+    el.addEventListener('mouseenter', open);
+    el.addEventListener('focusin', open);
+    el.addEventListener('mouseleave', close);
+    el.addEventListener('focusout', close);
+  });
+
+  hotspot?.addEventListener('click', () => {
+    const isOpen = activeWorldIdx === wi && domHoverWorldIdx === wi;
+    activeWorldIdx = isOpen ? null : wi;
+    domHoverWorldIdx = isOpen ? null : wi;
+  });
+});
+
+// ── DRAW ─────────────────────────────────────────────────────────────────────
 function drawBG(gi) {
   const alpha = gi > 0 ? Math.max(0.07, 1 - gi * 0.93) : 1;
   ctx.globalAlpha = alpha;
@@ -240,6 +522,7 @@ function drawBG(gi) {
   ctx.fillRect(0, 0, W, H);
   ctx.globalAlpha = 1;
 }
+
 function drawRipples() {
   for (let i = ripples.length - 1; i >= 0; i--) {
     const r = ripples[i];
@@ -253,6 +536,7 @@ function drawRipples() {
     ctx.stroke();
   }
 }
+
 function drawFormation(gi) {
   if (gi < 0.2) return;
   const a = ((gi - 0.2) / 0.8) * 0.12;
@@ -266,79 +550,73 @@ function drawFormation(gi) {
   ctx.lineWidth   = 0.4;
   ctx.stroke();
 }
+
 function drawOrbiters(cdr) {
-  if (getState() !== 'portal') return;
+  const visibleWorlds = getVisibleWorlds();
+  if (!visibleWorlds.length) return;
   const orR   = Math.max(55, cdr * 4.8);
   const nodeR = Math.max(5, cdr * 0.75);
+
   WORLDS.forEach((world, wi) => {
+    if (!visibleWorlds.includes(wi)) return;
     const dp = dotPos(world);
+
+    // Ring
     ctx.beginPath();
     ctx.arc(dp.x, dp.y, orR, 0, Math.PI * 2);
-    ctx.strokeStyle = `${world.color}18`;
-    ctx.lineWidth   = 0.5;
+    ctx.strokeStyle = `${world.color}36`;
+    ctx.lineWidth   = 0.8;
     ctx.stroke();
-    world.nodes.forEach((node, ni) => {
+
+    const renderNodes = getRenderNodes(world);
+    renderNodes.forEach((node, ni) => {
       const np      = nodePos(wi, ni);
       const isHov   = hoverTarget?.type === 'node' && hoverTarget.worldIdx === wi && hoverTarget.nodeIdx === ni;
-      const isExp   = expandedGroup?.worldIdx === wi && expandedGroup?.nodeIdx === ni;
       const isPH    = node.placeholder;
+      const isExp   = false;
       const nc      = node.color || world.color;
+
+      // Spoke
       ctx.beginPath(); ctx.moveTo(dp.x, dp.y); ctx.lineTo(np.x, np.y);
-      ctx.strokeStyle = `${world.color}12`; ctx.lineWidth = 0.4; ctx.stroke();
+      ctx.strokeStyle = `${world.color}28`; ctx.lineWidth = 0.6; ctx.stroke();
+
+      // Node
       ctx.beginPath();
       ctx.arc(np.x, np.y, nodeR, 0, Math.PI * 2);
-      ctx.fillStyle = isPH ? `${nc}28` : (isHov || isExp) ? nc : `${nc}88`;
-      if ((isHov || isExp) && !isPH) { ctx.shadowBlur = 10; ctx.shadowColor = nc; }
+      ctx.fillStyle = isPH ? `${nc}38` : (isHov || isExp) ? nc : `${nc}cc`;
+      if (isHov && !isPH) { ctx.shadowBlur = 10; ctx.shadowColor = nc; }
       ctx.fill(); ctx.shadowBlur = 0;
-      if (node.isGroup) {
-        ctx.beginPath(); ctx.arc(np.x, np.y, nodeR + 2.5, 0, Math.PI * 2);
-        ctx.strokeStyle = isExp ? `${nc}cc` : `${nc}44`;
-        ctx.lineWidth = 0.8; ctx.stroke();
-      }
+
+      // Label
       ctx.font         = `${Math.max(7, nodeR * 0.75)}px ui-monospace,monospace`;
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'top';
       ctx.fillStyle    = isPH ? 'rgba(255,255,255,0.18)'
-                       : (isHov || isExp) ? 'rgba(255,255,255,0.95)'
-                       : 'rgba(255,255,255,0.55)';
+                       : isHov ? 'rgba(255,255,255,0.95)'
+                       : 'rgba(255,255,255,0.82)';
       ctx.fillText(node.label, np.x, np.y + nodeR + 3);
-      if (isExp && expandedGroup) {
-        expandedGroup.children.forEach((child, ci) => {
-          const cp     = childPos(wi, ni, ci);
-          if (!cp) return;
-          const isChov = hoverTarget?.type === 'child' && hoverTarget.worldIdx === wi
-                      && hoverTarget.nodeIdx === ni && hoverTarget.childIdx === ci;
-          const cnR    = nodeR * 0.68;
-          ctx.beginPath(); ctx.moveTo(np.x, np.y); ctx.lineTo(cp.x, cp.y);
-          ctx.strokeStyle = `${world.color}30`; ctx.lineWidth = 0.4; ctx.stroke();
-          ctx.beginPath(); ctx.arc(cp.x, cp.y, cnR, 0, Math.PI * 2);
-          ctx.fillStyle = isChov ? world.color : `${world.color}77`;
-          if (isChov) { ctx.shadowBlur = 8; ctx.shadowColor = world.color; }
-          ctx.fill(); ctx.shadowBlur = 0;
-          ctx.font         = `${Math.max(6, cnR * 0.8)}px ui-monospace,monospace`;
-          ctx.textAlign    = 'center';
-          ctx.textBaseline = 'top';
-          ctx.fillStyle    = isChov ? '#fff' : 'rgba(255,255,255,0.6)';
-          ctx.fillText(child.label, cp.x, cp.y + cnR + 2.5);
-        });
-      }
     });
   });
 }
+
 function drawDots(cdr, gi) {
+  const visibleWorlds = getVisibleWorlds();
   const isPortal = getState() === 'portal';
-  WORLDS.forEach((world) => {
+  WORLDS.forEach((world, wi) => {
     const p = dotPos(world);
+    const active = visibleWorlds.includes(wi) || hoverTarget?.worldIdx === wi;
     if (gi > 0) { ctx.shadowBlur = 6 + gi * 28; ctx.shadowColor = world.color; }
-    ctx.beginPath(); ctx.arc(p.x, p.y, cdr, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(p.x, p.y, active ? cdr * 1.18 : cdr, 0, Math.PI * 2);
     ctx.fillStyle = world.color; ctx.fill();
     ctx.shadowBlur = 0;
-    if (isPortal) {
+    if (isPortal || active) {
       ctx.beginPath(); ctx.arc(p.x, p.y, cdr * 1.65, 0, Math.PI * 2);
-      ctx.strokeStyle = `${world.color}33`; ctx.lineWidth = 1; ctx.stroke();
+      ctx.strokeStyle = `${world.color}66`; ctx.lineWidth = 1.2; ctx.stroke();
     }
   });
 }
+
+// ── TIMESTAMP ────────────────────────────────────────────────────────────────
 const tsEl = document.getElementById('ts');
 function updateTS() {
   const n  = new Date();
@@ -351,27 +629,40 @@ function updateTS() {
 }
 setInterval(updateTS, 1000);
 updateTS();
+
+// ── LOOP ─────────────────────────────────────────────────────────────────────
 function loop(now) {
   if (!lastTime)  lastTime  = now;
   if (!lastDecay) lastDecay = now;
   const dt = Math.min(now - lastTime, 100);
   lastTime = now;
+
   if (speedMult > 1) {
     speedMult = Math.max(1, speedMult * Math.pow(0.5, (now - lastDecay) / DECAY_HL));
     lastDecay = now;
   }
-  if (getState() !== 'portal' && expandedGroup) { expandedGroup = null; hoverTarget = null; }
+
   angle += BASE_RATE * speedMult * dt;
-  const orbitRate = BASE_RATE * Math.max(4, speedMult * 0.08);
-  orbitAngles = orbitAngles.map(a => a + orbitRate * dt);
-  if (expandedGroup) expandedGroup.orbitOffset += BASE_RATE * 6 * dt;
+
+  const visibleWorlds = getVisibleWorlds();
+  orbitAngles = orbitAngles.map((a, wi) => {
+    const orbitRate = visibleWorlds.includes(wi) ? (2 * Math.PI) / 12000 : BASE_RATE * 4;
+    return a + orbitRate * dt;
+  });
+
+  if (expandedGroup) expandedGroup.orbitOffset += ((2 * Math.PI) / 9000) * dt;
+
   const cdr = getCDR();
   const gi  = getGlow();
+
   drawBG(gi);
   drawRipples();
   drawFormation(gi);
   drawOrbiters(cdr);
   drawDots(cdr, gi);
+  updateLegend();
+  positionDomOverlays();
+
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
