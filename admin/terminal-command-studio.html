@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Terminal Command Studio</title>
+  <style>
+    :root{color-scheme:dark;--bg:#090b0e;--surface:#11151b;--hi:#1a2029;--line:#29313d;--text:#e8e4dc;--dim:#9ba3ae;--accent:#4dd8c7;--warn:#ffc14d;--err:#ff5c47;font:14px/1.45 ui-monospace,Consolas,monospace}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}.top{position:sticky;top:0;z-index:3;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:1rem 1.25rem;background:rgba(9,11,14,.96);border-bottom:1px solid var(--line)}h1{font-size:1rem;margin:0 auto 0 0}.status{color:var(--dim)}button,.file-label{background:var(--hi);border:1px solid var(--line);border-radius:6px;padding:.45rem .7rem}.primary{border-color:var(--accent);color:var(--accent)}.danger{color:var(--err)}.file-label input{display:none}.layout{display:grid;grid-template-columns:260px minmax(420px,1fr) 360px;min-height:calc(100vh - 66px)}aside,main{padding:1rem;border-right:1px solid var(--line);overflow:auto}.right{border:0}h2{font-size:.9rem;color:var(--dim);margin:.25rem 0 .8rem}.list{display:grid;gap:.35rem}.list button{text-align:left;background:transparent;border-color:transparent}.list button.active{background:var(--hi);border-color:var(--line)}.list small{display:block;color:var(--dim)}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.field{display:grid;gap:.3rem;margin-bottom:.8rem}.field>span{color:var(--dim);font-size:.78rem}input,select,textarea{width:100%;background:#0d1015;border:1px solid var(--line);border-radius:6px;padding:.55rem}textarea{min-height:78px;resize:vertical}.checks{display:flex;gap:1rem;flex-wrap:wrap;margin:.5rem 0 1rem}.checks label{color:var(--dim)}.checks input{width:auto}.section{padding:1rem;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:1rem}.section-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem}.response{display:grid;grid-template-columns:1fr 72px auto;gap:.45rem;margin:.45rem 0}.response textarea{min-height:48px}.response input{height:48px}.note{color:var(--warn);font-size:.78rem}.errors{color:var(--err);white-space:pre-wrap}.json{min-height:360px;font-size:12px}.hidden{display:none!important}@media(max-width:1050px){.layout{grid-template-columns:220px 1fr}.right{grid-column:1/-1;border-top:1px solid var(--line)}}@media(max-width:700px){.layout{display:block}aside,main{border:0;border-bottom:1px solid var(--line)}.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <h1>terminal command studio</h1><span id="status" class="status">draft saved locally</span><span id="auth-status" class="status">signed out</span>
+    <button id="sign-in" class="primary">sign in with Google</button><button id="sign-out" class="hidden">sign out</button>
+    <button id="load-live">load live</button><button id="save-draft">save cloud draft</button><button id="publish-live" class="primary">publish live</button>
+    <button id="new-command">+ command</button><button id="new-pool">+ response pool</button>
+    <label class="file-label">import JSON<input id="import-file" type="file" accept="application/json,.json"></label>
+    <button id="copy-json">copy JSON</button><button id="download-json" class="primary">download JSON</button>
+  </header>
+  <div class="layout">
+    <aside>
+      <h2>commands & triggers</h2><div id="command-list" class="list"></div>
+      <h2>response pools</h2><div id="pool-list" class="list"></div>
+    </aside>
+    <main>
+      <section id="command-editor" class="section"></section>
+      <section id="pool-editor" class="section hidden"></section>
+      <section class="section">
+        <h2>global modifiers</h2>
+        <div class="row">
+          <label class="field"><span>selection mode</span><select id="selection-mode"><option>weighted</option><option>random</option><option>sequential</option></select></label>
+          <label class="field"><span>no-repeat window</span><input id="no-repeat" type="number" min="0" max="100"></label>
+          <label class="field"><span>default cooldown (ms)</span><input id="cooldown" type="number" min="0" step="100"></label>
+          <label class="field"><span>case handling</span><select id="case-mode"><option value="insensitive">case insensitive</option><option value="sensitive">case sensitive</option></select></label>
+        </div>
+        <p class="note">Server tasks are configuration keys only. A backend must separately authenticate the caller and map each key to an explicit allowlisted function. Raw shell commands are intentionally unsupported.</p>
+      </section>
+    </main>
+    <aside class="right">
+      <h2>configuration JSON</h2><div id="errors" class="errors"></div><textarea id="json" class="json" spellcheck="false"></textarea>
+      <button id="apply-json">apply JSON edits</button><button id="reset" class="danger">reset draft</button>
+    </aside>
+  </div>
+  <script>
+    const STORAGE_KEY='mario0318-terminal-studio-v1';
+    const seed={version:1,settings:{selectionMode:'weighted',noRepeatWindow:3,defaultCooldownMs:0,caseMode:'insensitive'},commands:[
+      {id:'help',name:'help',aliases:['?'],desc:'some of what this thing does',category:'core',triggers:[{type:'exact',value:'help'}],enabled:true,listed:true,action:{type:'response',target:'help'},responsePool:'help',cooldownMs:0,allowArgs:true,blockedPhrases:[]},
+      {id:'projects',name:'projects',aliases:['ls','work'],desc:'things that got built',category:'explore',triggers:[{type:'exact',value:'projects'}],enabled:true,listed:true,action:{type:'portal',target:'projects'},responsePool:'projects',cooldownMs:0,allowArgs:false,blockedPhrases:[]},
+      {id:'play',name:'play',aliases:['sc','music'],desc:'random clip from the vault',category:'toys',triggers:[{type:'exact',value:'play'}],enabled:true,listed:true,action:{type:'panel',target:'soundcloud'},responsePool:'play',cooldownMs:0,allowArgs:true,blockedPhrases:[]},
+      {id:'analemma',name:'analemma',aliases:['studio'],desc:'analemma studio',category:'toys',triggers:[{type:'exact',value:'analemma'}],enabled:true,listed:true,action:{type:'panel',target:'analemma'},responsePool:'analemma',cooldownMs:0,allowArgs:false,blockedPhrases:[]},
+      {id:'dots',name:'dots',aliases:[],desc:'mess with the dots',category:'toys',triggers:[{type:'exact',value:'dots'}],enabled:true,listed:false,action:{type:'inline-applet',target:'dots-lab'},responsePool:'easter',cooldownMs:0,allowArgs:false,blockedPhrases:[]},
+      {id:'contact',name:'contact',aliases:['hi'],desc:'reach out',category:'core',triggers:[{type:'exact',value:'contact'}],enabled:true,listed:true,action:{type:'portal',target:'contact'},responsePool:'contact',cooldownMs:0,allowArgs:false,blockedPhrases:[]},
+      {id:'clear',name:'clear',aliases:[],desc:'',category:'core',triggers:[{type:'exact',value:'clear'}],enabled:true,listed:false,action:{type:'internal',target:'clear'},responsePool:'clear',cooldownMs:0,allowArgs:false,blockedPhrases:[]},
+      {id:'close',name:'close',aliases:[],desc:'',category:'core',triggers:[{type:'exact',value:'close'}],enabled:true,listed:false,action:{type:'internal',target:'close'},responsePool:'close',cooldownMs:0,allowArgs:false,blockedPhrases:[]}
+    ],responsePools:{help:[{text:'some things you can ask this thing to do.',weight:1,enabled:true}],projects:[{text:'opening projects.',weight:1,enabled:true}],unknown:[{text:'no idea what that means. respect the attempt though.',weight:1,enabled:true}]}};
+    let state=load(),selection={kind:'command',key:state.commands[0]?.id||null};
+    const $=id=>document.getElementById(id), clone=v=>JSON.parse(JSON.stringify(v));
+    function load(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(seed)}catch{return clone(seed)}}
+    function save(message='saved'){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));$('status').textContent=message;renderJson();}
+    function node(tag,text,attrs={}){const n=document.createElement(tag);if(text!==null)n.textContent=text;for(const[k,v]of Object.entries(attrs))n[k]=v;return n}
+    function field(label,value,onchange,type='text'){const l=node('label',null,{className:'field'});l.append(node('span',label));const i=node(type==='select'?'select':'input',null);if(type==='number')i.type='number';i.value=value??'';i.addEventListener('input',e=>onchange(type==='number'?Number(e.target.value):e.target.value));l.append(i);return l}
+    function csv(v){return (v||[]).join(', ')} function split(v){return v.split(',').map(x=>x.trim()).filter(Boolean)}
+    function selectedCommand(){return state.commands.find(c=>c.id===selection.key)}
+    function render(){renderLists();renderEditor();renderSettings();renderJson()}
+    function renderLists(){const cl=$('command-list');cl.replaceChildren();state.commands.forEach(c=>{const b=node('button',c.name||'(unnamed)',{className:selection.kind==='command'&&selection.key===c.id?'active':''});b.append(node('small',(c.enabled?'enabled':'blocked')+' · '+c.action.type));b.onclick=()=>{selection={kind:'command',key:c.id};render()};cl.append(b)});const pl=$('pool-list');pl.replaceChildren();Object.keys(state.responsePools).sort().forEach(k=>{const b=node('button',k,{className:selection.kind==='pool'&&selection.key===k?'active':''});b.append(node('small',state.responsePools[k].length+' responses'));b.onclick=()=>{selection={kind:'pool',key:k};render()};pl.append(b)})}
+    function renderEditor(){const ce=$('command-editor'),pe=$('pool-editor');ce.classList.toggle('hidden',selection.kind!=='command');pe.classList.toggle('hidden',selection.kind!=='pool');if(selection.kind==='command')renderCommand(ce);else renderPool(pe)}
+    function renderCommand(host){host.replaceChildren();const c=selectedCommand();if(!c){host.append(node('p','add or select a command.'));return}const head=node('div',null,{className:'section-head'});head.append(node('h2','command'));const del=node('button','delete',{className:'danger'});del.onclick=()=>{state.commands=state.commands.filter(x=>x.id!==c.id);selection.key=state.commands[0]?.id||null;save();render()};head.append(del);host.append(head);
+      const grid=node('div',null,{className:'row'});grid.append(field('name',c.name,v=>{c.name=v;c.id=slug(v)||c.id;selection.key=c.id;save();renderLists()}),field('aliases (comma separated)',csv(c.aliases),v=>{c.aliases=split(v);save()}),field('description',c.desc,v=>{c.desc=v;save()}),field('category',c.category,v=>{c.category=v;save()}),field('response pool',c.responsePool,v=>{c.responsePool=v;save()}),field('cooldown override (ms)',c.cooldownMs,v=>{c.cooldownMs=v;save()},'number'));host.append(grid);
+      const checks=node('div',null,{className:'checks'});[['enabled',c.enabled],['listed in help',c.listed],['allow arguments',c.allowArgs]].forEach(([label,val])=>{const l=node('label',label);const i=node('input',null);i.type='checkbox';i.checked=val;i.onchange=e=>{c[label==='listed in help'?'listed':label==='allow arguments'?'allowArgs':'enabled']=e.target.checked;save();renderLists()};l.prepend(i);checks.append(l)});host.append(checks);
+      const row=node('div',null,{className:'row'});const at=field('action type',c.action.type,v=>{c.action.type=v;save()},'select');['response','portal','panel','inline-applet','internal','client-task','server-task'].forEach(v=>at.querySelector('select').append(node('option',v,{value:v})));at.querySelector('select').value=c.action.type;row.append(at,field('action target / allowlisted task key',c.action.target,v=>{c.action.target=v;save()}));host.append(row);
+      host.append(field('blocked words or phrases (comma separated)',csv(c.blockedPhrases),v=>{c.blockedPhrases=split(v);save()}));const th=node('div',null,{className:'section-head'});th.append(node('h2','phrase & character triggers'));const add=node('button','+ trigger');add.onclick=()=>{c.triggers.push({type:'exact',value:''});save();render()};th.append(add);host.append(th);c.triggers.forEach((t,i)=>{const r=node('div',null,{className:'response'});const inp=node('input',null);inp.value=t.value;inp.placeholder='words or characters';inp.oninput=e=>{t.value=e.target.value;save()};const sel=node('select',null);['exact','prefix','contains','regex'].forEach(v=>sel.append(node('option',v,{value:v})));sel.value=t.type;sel.onchange=e=>{t.type=e.target.value;save()};const d=node('button','×',{className:'danger'});d.onclick=()=>{c.triggers.splice(i,1);save();render()};r.append(inp,sel,d);host.append(r)})}
+    function renderPool(host){host.replaceChildren();const key=selection.key,items=state.responsePools[key];const head=node('div',null,{className:'section-head'});head.append(node('h2','response pool: '+key));const controls=node('div',null);const add=node('button','+ response');add.onclick=()=>{items.push({text:'',weight:1,enabled:true});save();render()};const del=node('button','delete pool',{className:'danger'});del.onclick=()=>{delete state.responsePools[key];selection={kind:'command',key:state.commands[0]?.id||null};save();render()};controls.append(add,del);head.append(controls);host.append(head);items.forEach((item,i)=>{const r=node('div',null,{className:'response'});const text=node('textarea',null);text.value=item.text;text.placeholder='response text; placeholders such as {input} or {title}';text.oninput=e=>{item.text=e.target.value;save()};const w=node('input',null);w.type='number';w.min='0';w.step='.1';w.title='weight / frequency';w.value=item.weight;w.oninput=e=>{item.weight=Number(e.target.value);save()};const d=node('button',item.enabled?'on':'off');d.onclick=()=>{item.enabled=!item.enabled;save();render()};r.append(text,w,d);host.append(r)})}
+    function renderSettings(){const s=state.settings;$('selection-mode').value=s.selectionMode;$('no-repeat').value=s.noRepeatWindow;$('cooldown').value=s.defaultCooldownMs;$('case-mode').value=s.caseMode}
+    function renderJson(){$('json').value=JSON.stringify(state,null,2);$('errors').textContent=validate(state).join('\n')}
+    function validate(v){const e=[];if(v.version!==1)e.push('version must be 1');const names=new Set;for(const c of v.commands||[]){if(!c.name)e.push('command missing name');if(names.has(c.name))e.push('duplicate command: '+c.name);names.add(c.name);if(c.action?.type==='server-task'&&!c.action.target)e.push(c.name+': server task needs an allowlisted key');for(const t of c.triggers||[])if(t.type==='regex')try{new RegExp(t.value)}catch{e.push(c.name+': invalid regex '+t.value)}}return e}
+    function slug(v){return v.toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-|-$/g,'')}
+    $('new-command').onclick=()=>{let n='command-'+(state.commands.length+1);state.commands.push({id:n,name:n,aliases:[],triggers:[{type:'exact',value:n}],enabled:true,listed:false,action:{type:'response',target:n},responsePool:'unknown',cooldownMs:0,allowArgs:false,blockedPhrases:[]});selection={kind:'command',key:n};save();render()};
+    $('new-pool').onclick=()=>{const name=prompt('response pool name');if(!name||state.responsePools[name])return;state.responsePools[name]=[{text:'',weight:1,enabled:true}];selection={kind:'pool',key:name};save();render()};
+    $('selection-mode').onchange=e=>{state.settings.selectionMode=e.target.value;save()};$('no-repeat').oninput=e=>{state.settings.noRepeatWindow=Number(e.target.value);save()};$('cooldown').oninput=e=>{state.settings.defaultCooldownMs=Number(e.target.value);save()};$('case-mode').onchange=e=>{state.settings.caseMode=e.target.value;save()};
+    $('apply-json').onclick=()=>{try{const next=JSON.parse($('json').value),errors=validate(next);if(errors.length)throw Error(errors.join('\n'));state=next;selection={kind:'command',key:state.commands[0]?.id||null};save('JSON applied');render()}catch(e){$('errors').textContent=e.message}};
+    $('import-file').onchange=async e=>{try{const next=JSON.parse(await e.target.files[0].text()),errors=validate(next);if(errors.length)throw Error(errors.join('\n'));state=next;selection={kind:'command',key:state.commands[0]?.id||null};save('imported');render()}catch(err){$('errors').textContent=err.message}};
+    $('copy-json').onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(state,null,2));$('status').textContent='copied'};
+    $('download-json').onclick=()=>{const a=node('a',null);a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='terminal.config.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)};
+    $('reset').onclick=()=>{if(confirm('reset the local draft?')){state=clone(seed);selection={kind:'command',key:state.commands[0].id};save('reset');render()}};
+    window.studioApi={getState:()=>clone(state),setState(next,message='loaded'){state=clone(next);selection={kind:'command',key:state.commands[0]?.id||null};save(message);render()},setStatus(message){$('status').textContent=message}};
+    render();
+  </script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
+
+    const app=initializeApp({apiKey:'AIzaSyDyBzyRfNs_f-WlP6qGyQBhVB-w6bWIrU8',authDomain:'mario0318-terminal-live.firebaseapp.com',projectId:'mario0318-terminal-live',appId:'1:526649182798:web:a6eed4b37970138f0d911f',messagingSenderId:'526649182798'});
+    const auth=getAuth(app),db=getFirestore(app),provider=new GoogleAuthProvider();
+    provider.setCustomParameters({login_hint:'mario0318@gmail.com'});
+    const byId=id=>document.getElementById(id);let currentUser=null;
+    function requireMario(){if(!currentUser||currentUser.email!=='mario0318@gmail.com')throw new Error('authorized Mario account required')}
+    async function loadDocument(ref,label){const snap=await getDoc(ref);if(!snap.exists())throw new Error(label+' does not exist yet');const data=snap.data();window.studioApi.setState(JSON.parse(data.configJson),label+' loaded')}
+    byId('sign-in').onclick=()=>signInWithPopup(auth,provider).catch(e=>window.studioApi.setStatus(e.message));
+    byId('sign-out').onclick=()=>signOut(auth);
+    byId('load-live').onclick=()=>loadDocument(doc(db,'terminal','config'),'live configuration').catch(e=>window.studioApi.setStatus(e.message));
+    byId('save-draft').onclick=async()=>{try{requireMario();await setDoc(doc(db,'terminalDrafts',currentUser.uid),{configJson:JSON.stringify(window.studioApi.getState()),savedAt:serverTimestamp(),savedBy:currentUser.email});window.studioApi.setStatus('cloud draft saved')}catch(e){window.studioApi.setStatus(e.message)}};
+    byId('publish-live').onclick=async()=>{try{requireMario();const config=window.studioApi.getState(),configJson=JSON.stringify(config),bytes=new TextEncoder().encode(configJson).byteLength;if(bytes>900000)throw new Error(`publish blocked: ${bytes.toLocaleString()} bytes exceeds the 900,000-byte safety ceiling`);const id=new Date().toISOString().replace(/[:.]/g,'-');const payload={configJson,publishedAt:serverTimestamp(),publishedBy:currentUser.email,versionId:id};await setDoc(doc(db,'terminalVersions',id),payload);await setDoc(doc(db,'terminal','config'),payload);window.studioApi.setStatus(`published live: ${id} · ${bytes.toLocaleString()} bytes`)}catch(e){window.studioApi.setStatus(e.message)}};
+    onAuthStateChanged(auth,async user=>{if(user&&user.email!=='mario0318@gmail.com'){await signOut(auth);window.studioApi.setStatus('that Google account is not authorized');return}currentUser=user;byId('auth-status').textContent=user?user.email:'signed out';byId('sign-in').classList.toggle('hidden',!!user);byId('sign-out').classList.toggle('hidden',!user)});
+  </script>
+</body>
+</html>

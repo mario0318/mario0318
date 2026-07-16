@@ -1,0 +1,6 @@
+.firebase/
+firebase-debug.log
+.gh-auth-output.txt
+.gh-auth-error.txt
+node_modules/
+.playwright-cli/

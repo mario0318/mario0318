@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isMario() {
+      return request.auth != null
+        && request.auth.token.email == 'mario0318@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    match /terminal/config {
+      allow read: if true;
+      allow write: if isMario();
+    }
+
+    match /terminalVersions/{version} {
+      allow read, write: if isMario();
+    }
+
+    match /terminalDrafts/{owner} {
+      allow read, write: if isMario() && owner == request.auth.uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
