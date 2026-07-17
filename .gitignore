@@ -4,3 +4,4 @@ firebase-debug.log
 .gh-auth-error.txt
 node_modules/
 .playwright-cli/
+test-results/

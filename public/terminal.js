@@ -175,6 +175,10 @@ async function unmountApplet() {
 
 function anyUiOpen() { return el.portal.open || !!openApplet; }
 
+function navigate(path) {
+  window.setTimeout(() => window.location.assign(path), 420);
+}
+
 async function closeAll() {
   closePortal();
   await unmountApplet();
@@ -266,7 +270,7 @@ async function run(raw) {
   if (command?.name === 'play') await soundcloud.load();
 
   const ctx = {
-    rawInput: input, print, openPortal, closeAll, clearLog, logHasContent, anyUiOpen,
+    rawInput: input, print, openPortal, closeAll, clearLog, logHasContent, anyUiOpen, navigate,
     openPanel: (key, data) => mountApplet(key, data, false),
     openInlineApplet: (key) => mountApplet(key, null, true),
     soundcloud,

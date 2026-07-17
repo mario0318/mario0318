@@ -15,6 +15,7 @@
 //       clearLog()      : wipe #out
 //       logHasContent() : boolean
 //       anyUiOpen()     : boolean
+//       navigate(path)  : move to another first-party interface
 //       soundcloud      : { tracks: []|null, pickRandom(): {title, url} }
 //       analemmaLive    : boolean (studio web-hosted yet?)
 //
@@ -28,6 +29,13 @@ import { pickLine, formatLine, pickEaster, helpKeysLines } from './terminal-resp
 export function respond(command, args, ctx) {
   if (!command) {
     const raw = ctx.rawInput.trim();
+    const normalized = raw.toLowerCase().replace(/\s+/g, ' ');
+    if (normalized === 'orbit' || normalized === 'open orbit' || normalized === 'three body') {
+      const line = pickLine('easter', 'orbit');
+      if (line) ctx.print(line);
+      ctx.navigate?.('/orbital.html');
+      return;
+    }
     const line =
       pickEaster(raw) ||
       formatLine(pickLine('unknown'), { input: raw });
@@ -148,5 +156,5 @@ function printHelpList(ctx) {
   }
   ctx.print('  help keys'.padEnd(pad + 2) + 'keyboard stuff');
   ctx.print('');
-  ctx.print("there's more. this list isn't it.");
+  ctx.print("there's more. three bodies are still in orbit.");
 }

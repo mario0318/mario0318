@@ -20,10 +20,12 @@ check('dollar-safe {input}', t2.startsWith('$$$ profit $&:'), t2);
 // easter reachability through dispatcher (bug 1 fix)
 setRegistry([{ name: 'projects', desc: 'x', listed: true }]);
 let printed = [];
+let navigated = null;
 const ctx = {
   rawInput: 'whoami',
   print: (t) => printed.push(t),
   openPortal() {}, openPanel() {}, openInlineApplet() {}, closeAll() {},
+  navigate: (path) => { navigated = path; },
   clearLog() {}, logHasContent: () => true, anyUiOpen: () => false,
   soundcloud: { tracks: [], pickRandom() {} }, analemmaLive: false,
 };
@@ -48,6 +50,10 @@ for (let i = 0; i < 8; i++) {
   if (printed[0] && printed[0].startsWith('frobnicate the widget:')) { hit = true; break; }
 }
 check('unknown pool echoes raw input', hit);
+
+ctx.rawInput = 'three body';
+respond(null, [], ctx);
+check('orbital puzzle opens backup portal', navigated === '/orbital.html', navigated);
 
 // play with empty vault -> empty variant, no panel
 let panelOpened = false;
@@ -83,7 +89,7 @@ check('close nothing variant', printed[0] === 'nothing open to close. bold move 
 printed = [];
 respond({ name: 'help', ui: 'text' }, [], ctx);
 check('help lists registry entries', printed.some((l) => l.includes('projects')));
-check('help ends with teaser', printed[printed.length - 1] === "there's more. this list isn't it.");
+check('help ends with teaser', printed[printed.length - 1] === "there's more. three bodies are still in orbit.");
 
 // help keys prints verbatim block
 printed = [];

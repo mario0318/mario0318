@@ -117,6 +117,11 @@ let responsePools = {
       'dots-lab online. the status lights just became your problem.',
     ],
     dotsLabReset: ['dots back to default. the breathing is normal again.'],
+    orbit: [
+      'three bodies found. opening the quiet channel.',
+      'orbital backup responding. mind the gravity.',
+      'old signal acquired. stepping sideways.',
+    ],
   },
 };
 
