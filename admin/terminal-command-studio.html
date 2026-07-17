@@ -54,8 +54,9 @@
       {id:'clear',name:'clear',aliases:[],desc:'',category:'core',triggers:[{type:'exact',value:'clear'}],enabled:true,listed:false,action:{type:'internal',target:'clear'},responsePool:'clear',cooldownMs:0,allowArgs:false,blockedPhrases:[]},
       {id:'close',name:'close',aliases:[],desc:'',category:'core',triggers:[{type:'exact',value:'close'}],enabled:true,listed:false,action:{type:'internal',target:'close'},responsePool:'close',cooldownMs:0,allowArgs:false,blockedPhrases:[]}
     ],responsePools:{help:[{text:'some things you can ask this thing to do.',weight:1,enabled:true}],projects:[{text:'opening projects.',weight:1,enabled:true}],unknown:[{text:'no idea what that means. respect the attempt though.',weight:1,enabled:true}]}};
+    function clone(v){return JSON.parse(JSON.stringify(v))}
     let state=load(),selection={kind:'command',key:state.commands[0]?.id||null};
-    const $=id=>document.getElementById(id), clone=v=>JSON.parse(JSON.stringify(v));
+    const $=id=>document.getElementById(id);
     function load(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(seed)}catch{return clone(seed)}}
     function save(message='saved'){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));$('status').textContent=message;renderJson();}
     function node(tag,text,attrs={}){const n=document.createElement(tag);if(text!==null)n.textContent=text;for(const[k,v]of Object.entries(attrs))n[k]=v;return n}
