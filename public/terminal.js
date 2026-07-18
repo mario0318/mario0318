@@ -11,10 +11,9 @@ import { respond, setRegistry } from './terminal-dispatch.js';
 import { configureResponses } from './terminal-responses.js';
 
 const $ = (id) => document.getElementById(id);
-const el = { term: null, out: null, cmd: null, chips: null, dots: null, portal: null, panel: null };
+const el = { term: null, out: null, cmd: null, dots: null, portal: null, panel: null };
 
 const MAX_LINES = 500;
-const CHIPS = ['help', 'projects', 'play', 'analemma', 'contact'];
 const LIVE_CONFIG_URL = 'https://firestore.googleapis.com/v1/projects/mario0318-terminal-live/databases/(default)/documents/terminal/config?key=AIzaSyDyBzyRfNs_f-WlP6qGyQBhVB-w6bWIrU8';
 const LIVE_CACHE_KEY = 'mario0318-terminal-live-config-v1';
 const LIVE_CACHE_TTL = 5 * 60 * 1000;
@@ -67,7 +66,8 @@ const portalContent = {
 
 function openPortal(id, data) {
   el.portal.querySelector('#portal-title').textContent =
-    id === 'projects' ? 'things that got built'
+    id === 'identity' ? 'mario0318'
+    : id === 'projects' ? 'things that got built'
     : id === 'contact' ? 'reach out'
     : id === 'play-list' ? 'the vault'
     : id;
@@ -75,7 +75,23 @@ function openPortal(id, data) {
   const body = el.portal.querySelector('#portal-body');
   body.replaceChildren();
 
-  if (id === 'contact') {
+  if (id === 'identity') {
+    const links = [
+      ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
+      ['Contact', 'mailto:hi@mario0318.com', 'hi@mario0318.com'],
+      ['Orbital map', '/orbital.html', 'the three-dot world map'],
+    ];
+    for (const [label, href, description] of links) {
+      const a = document.createElement('a');
+      a.className = 'p-item';
+      a.href = href;
+      a.textContent = label;
+      const s = document.createElement('small');
+      s.textContent = description;
+      a.appendChild(s);
+      body.appendChild(a);
+    }
+  } else if (id === 'contact') {
     const a = document.createElement('a');
     a.className = 'p-item';
     a.href = 'mailto:hi@mario0318.com';
@@ -305,26 +321,11 @@ function complete() {
   else if (hits.length > 1) { stagger = 0; print(hits.join('   '), 'dim'); }
 }
 
-// ---------------------------------------------------------------- chips
-
-function buildChips() {
-  el.chips.replaceChildren();
-  for (const name of CHIPS) {
-    if (!byName.has(name)) continue;
-    const b = document.createElement('button');
-    b.className = 'chip';
-    b.type = 'button';
-    b.textContent = name;
-    b.addEventListener('click', () => { el.cmd.value = ''; run(name); });
-    el.chips.appendChild(b);
-  }
-}
-
 // ---------------------------------------------------------------- boot
 
 async function boot() {
   el.term = $('term'); el.out = $('out'); el.cmd = $('cmd');
-  el.chips = $('chips'); el.dots = document.querySelector('.dots');
+  el.dots = document.querySelector('.dots');
   el.portal = $('portal'); el.panel = $('panel');
 
   try {
@@ -355,11 +356,10 @@ async function boot() {
 
   $('fallback-nav').hidden = true;
   el.term.hidden = false;
-  buildChips();
   setDots('idle');
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const seq = ['mario0318', '· · ·', 'ready.'];
+  const seq = ['mario0318 web terminal', 'session ready', 'type help and press Enter to begin.'];
   if (reduced) { seq.forEach((l, i) => print(l, i ? 'dim' : '')); }
   else {
     let i = 0;
@@ -373,6 +373,9 @@ async function boot() {
   }
 
   el.cmd.focus();
+
+  $('identity-channel').addEventListener('click', () => openPortal('identity'));
+  $('projects-channel').addEventListener('click', () => run('projects'));
 
   $('prompt').addEventListener('submit', (e) => {
     e.preventDefault();
