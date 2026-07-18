@@ -5,3 +5,4 @@ firebase-debug.log
 node_modules/
 .playwright-cli/
 test-results/
+output/playwright/
