@@ -22,14 +22,22 @@
 
   <main id="term" class="term" hidden>
     <header class="term-head">
-      <div class="dots idle" role="img" aria-label="status indicator">
-        <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+      <div class="term-id" aria-label="mario0318 web terminal">
+        <span class="term-mark" aria-hidden="true">M318</span>
+        <span class="term-session">mario0318@web</span>
+      </div>
+      <div class="term-status">
+        <span class="term-path" aria-hidden="true">~/public</span>
+        <span class="term-mode">guest session</span>
+        <div class="dots idle" role="img" aria-label="terminal ready">
+          <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+        </div>
       </div>
     </header>
     <div id="out" class="term-out" role="log" aria-live="polite" aria-atomic="false"></div>
     <div id="chips" class="chips" role="listbox" aria-label="command suggestions"></div>
     <form id="prompt" class="term-prompt">
-      <span class="ps1" aria-hidden="true">~</span>
+      <span class="ps1" aria-hidden="true"><span class="ps1-user">guest</span><span class="ps1-at">@</span><span class="ps1-host">m318</span><span class="ps1-path">:~</span><span class="ps1-char">$</span></span>
       <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
              enterkeyhint="go" aria-label="terminal command input"
              placeholder="type something. or don't.">
