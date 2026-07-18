@@ -85,13 +85,12 @@ body {
 .term {
   display: flex;
   flex-direction: column;
+  width: 100%;
   height: 100dvh;
-  max-width: 92ch;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   padding: 0 1.5rem;
-  border-inline: 1px solid color-mix(in srgb, var(--rule) 58%, transparent);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
-  box-shadow: 0 0 80px rgba(0,0,0,.38);
 }
 .term[hidden] { display: none; }
 
@@ -110,33 +109,57 @@ body {
 }
 
 .term-id,
-.term-status {
+.term-channels {
   display: flex;
   align-items: center;
 }
 
 .term-id { gap: .75rem; }
-.term-status { gap: 1rem; }
-
-.term-mark {
-  align-self: stretch;
-  display: grid;
-  place-items: center;
-  padding-inline: .75rem;
-  border-inline: 1px solid var(--rule);
-  color: var(--bg);
-  background: var(--text);
-  font-weight: 800;
-  letter-spacing: .12em;
-}
 
 .term-session { color: var(--text); }
-.term-path { color: var(--dot-3); text-transform: none; }
-.term-mode { color: var(--text-ghost); }
 
-.dots {
-  padding-left: 1rem;
+.term-channels {
+  align-self: stretch;
+  margin-left: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.term-channels::-webkit-scrollbar { display: none; }
+.channel {
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  flex: none;
+  padding: 0 .8rem;
+  border: 0;
   border-left: 1px solid var(--rule);
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.channel:hover,
+.channel:focus-visible { color: var(--text); background: var(--surface); }
+.channel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--channel-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--channel-color) 45%, transparent);
+}
+.channel-identity { --channel-color: var(--dot-1); }
+.channel-raul3 { --channel-color: var(--dot-2); }
+.channel-projects { --channel-color: var(--dot-3); }
+
+.term-id > .dots {
+  align-self: stretch;
+  align-items: center;
+  padding-right: 1rem;
+  border-right: 1px solid var(--rule);
 }
 
 .term-out {
@@ -234,39 +257,6 @@ body {
 }
 #cmd:focus { outline: none; }
 #cmd::placeholder { color: var(--text-ghost); }
-
-/* ---------- chips ---------- */
-
-.chips {
-  flex: none;
-  display: flex;
-  gap: .5rem;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  padding: .55rem 0;
-  border-top: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
-  scrollbar-width: none;
-}
-.chips::-webkit-scrollbar { display: none; }
-.chips[hidden] { display: none; }
-
-.chip {
-  scroll-snap-align: start;
-  flex: none;
-  background: var(--surface);
-  color: var(--text-dim);
-  border: 1px solid transparent;
-  border-radius: 2px;
-  padding: .22rem .6rem;
-  font: inherit;
-  font-size: var(--fs-small);
-  cursor: pointer;
-  transition: transform var(--t-fast) var(--ease),
-              color var(--t-fast) var(--ease),
-              border-color var(--t-fast) var(--ease);
-}
-.chip:hover { color: var(--text); border-color: var(--text-ghost); }
-.chip:active { transform: scale(.98); }
 
 /* ---------- the three dots (spec §2) ---------- */
 
@@ -425,8 +415,7 @@ body.panel-open .term {
   transition: transform var(--t-slow) var(--ease);
 }
 body.panel-open .term-out,
-body.panel-open .term-head,
-body.panel-open .chips { display: none; }
+body.panel-open .term-head { display: none; }
 body.panel-open .term-prompt { padding: 1rem 0; }
 
 /* ---------- applet internals ---------- */
@@ -452,10 +441,12 @@ body.panel-open .term-prompt { padding: 1rem 0; }
 .lab-btn:hover { color: var(--text); }
 
 @media (max-width: 640px) {
-  .term { padding: 0 .75rem; border-inline: 0; }
+  .term { padding: 0 .75rem; }
   .term-head { min-height: 42px; }
-  .term-mode, .term-path { display: none; }
-  .term-mark { margin-left: -.75rem; }
+  .term-session { display: none; }
+  .channel { padding-inline: .6rem; }
+  .channel-label { font-size: 0; }
+  .channel-label::after { content: attr(data-short); font-size: 11px; }
   .term-out { padding-left: 1.4rem; background-position-x: -1rem; }
   .term-prompt { position: sticky; bottom: 0; margin-inline: -.75rem; padding-inline: .75rem; }
   .ps1-user, .ps1-at, .ps1-host { display: none; }

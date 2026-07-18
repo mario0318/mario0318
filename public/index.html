@@ -23,24 +23,29 @@
   <main id="term" class="term" hidden>
     <header class="term-head">
       <div class="term-id" aria-label="mario0318 web terminal">
-        <span class="term-mark" aria-hidden="true">M318</span>
-        <span class="term-session">mario0318@web</span>
-      </div>
-      <div class="term-status">
-        <span class="term-path" aria-hidden="true">~/public</span>
-        <span class="term-mode">guest session</span>
         <div class="dots idle" role="img" aria-label="terminal ready">
           <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
         </div>
+        <span class="term-session">mario0318@web</span>
       </div>
+      <nav class="term-channels" aria-label="mario0318 channels">
+        <button id="identity-channel" class="channel channel-identity" type="button" aria-label="mario0318 identity, social, and contact links">
+          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="mario" aria-hidden="true">mario0318</span>
+        </button>
+        <a class="channel channel-raul3" href="https://raul3.com" aria-label="raul3 builder site">
+          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="raul3" aria-hidden="true">raul3</span>
+        </a>
+        <button id="projects-channel" class="channel channel-projects" type="button" aria-label="projects and content">
+          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="work" aria-hidden="true">projects + content</span>
+        </button>
+      </nav>
     </header>
     <div id="out" class="term-out" role="log" aria-live="polite" aria-atomic="false"></div>
-    <div id="chips" class="chips" role="listbox" aria-label="command suggestions"></div>
     <form id="prompt" class="term-prompt">
       <span class="ps1" aria-hidden="true"><span class="ps1-user">guest</span><span class="ps1-at">@</span><span class="ps1-host">m318</span><span class="ps1-path">:~</span><span class="ps1-char">$</span></span>
       <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
              enterkeyhint="go" aria-label="terminal command input"
-             placeholder="type something. or don't.">
+             placeholder="type help, then press Enter">
     </form>
   </main>
 
