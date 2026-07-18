@@ -1,0 +1,8 @@
+.gcloudignore
+.git
+.gitignore
+admin/
+.firebaserc
+firebase.json
+firestore.rules
+firebase-debug.log

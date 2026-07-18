@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "mario0318",
+    "description": "select an orb to enter"
+  },
+  "theme": {
+    "background": "#0a0c10",
+    "text": "#f3f6ff",
+    "muted": "#9aa8b7",
+    "blue": "#4db8ff",
+    "green": "#55e09a",
+    "gray": "#9ab4c6"
+  },
+  "layout": {
+    "maxItemsPerOrbit": 10,
+    "topLevelCoordinates64": {
+      "blue": [19, 18],
+      "green": [19, 46],
+      "gray": [46, 32]
+    }
+  },
+  "orbs": [
+    {
+      "id": "blue",
+      "label": "Origin",
+      "shortLabel": "Origin",
+      "color": "blue",
+      "kind": "orbit",
+      "order": 0,
+      "manualAngle": null,
+      "description": "identity and signal",
+      "hidden": false,
+      "children": [
+        {
+          "id": "raul3",
+          "label": "raul3",
+          "kind": "link",
+          "href": "https://raul3.com",
+          "external": true,
+          "order": 0,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        },
+        {
+          "id": "github",
+          "label": "GitHub",
+          "kind": "link",
+          "href": "https://github.com/mario0318",
+          "external": true,
+          "order": 1,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        },
+        {
+          "id": "contact",
+          "label": "Contact",
+          "kind": "link",
+          "href": "mailto:hi@mario0318.com",
+          "external": true,
+          "order": 2,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal",
+          "kind": "link",
+          "href": "/",
+          "external": false,
+          "order": 3,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "green",
+      "label": "Build",
+      "shortLabel": "Build",
+      "color": "green",
+      "kind": "orbit",
+      "order": 1,
+      "manualAngle": null,
+      "description": "projects and tools",
+      "hidden": false,
+      "children": [
+        {
+          "id": "dapp-cam",
+          "label": "dapp.cam",
+          "kind": "link",
+          "href": "https://dapp.cam",
+          "external": true,
+          "order": 0,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        },
+        {
+          "id": "fairchild-alchemy",
+          "label": "Fairchild Alchemy",
+          "kind": "link",
+          "href": "https://fairchildalchemy.com",
+          "external": true,
+          "order": 1,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "gray",
+      "label": "Worlds",
+      "shortLabel": "Worlds",
+      "color": "gray",
+      "kind": "orbit",
+      "order": 2,
+      "manualAngle": null,
+      "description": "systems and worlds",
+      "hidden": false,
+      "children": [
+        {
+          "id": "sprime-io",
+          "label": "sprime.io",
+          "kind": "link",
+          "href": "https://sprime.io",
+          "external": true,
+          "order": 0,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        },
+        {
+          "id": "sprime-us",
+          "label": "sprime.us",
+          "kind": "link",
+          "href": "https://sprime.us",
+          "external": true,
+          "order": 1,
+          "manualAngle": null,
+          "hidden": false,
+          "children": []
+        }
+      ]
+    }
+  ]
+}
