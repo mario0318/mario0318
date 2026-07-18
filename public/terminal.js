@@ -233,7 +233,9 @@ function commandAllowed(command, raw) {
 
 function applyLiveConfig(live) {
   if (live?.version !== 1 || !Array.isArray(live.commands) || !live.commands.length) return false;
-  registry = live.commands.filter((command) => command.enabled !== false).map((command) => ({
+  const bundled = new Map(registry.map(command => [command.name, command]));
+  for (const command of live.commands) bundled.set(command.name, { ...bundled.get(command.name), ...command });
+  registry = [...bundled.values()].filter((command) => command.enabled !== false).map((command) => ({
     ...command,
     ui: command.action?.type || command.ui || 'text',
     applet: ['panel', 'inline-applet'].includes(command.action?.type) ? command.action.target : command.applet,
@@ -275,6 +277,7 @@ async function run(raw) {
     openInlineApplet: (key) => mountApplet(key, null, true),
     soundcloud,
     analemmaLive: false,
+    history: history.slice(),
   };
 
   const before = el.out.childElementCount;

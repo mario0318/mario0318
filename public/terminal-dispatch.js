@@ -25,6 +25,7 @@
 //   - every printed string flows through pickLine/formatLine; no ad-hoc copy
 
 import { pickLine, formatLine, pickEaster, helpKeysLines } from './terminal-responses.js';
+import { respondUtility } from './terminal-utilities.js';
 
 export function respond(command, args, ctx) {
   if (!command) {
@@ -117,6 +118,7 @@ export function respond(command, args, ctx) {
     }
 
     default: {
+      if (respondUtility(command.name, args, ctx)) return;
       if (command.action?.type === 'response' || command.action?.type === 'client-task') {
         const custom = pickLine(command.responsePool || command.name);
         if (custom) {

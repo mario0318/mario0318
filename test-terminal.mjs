@@ -28,6 +28,7 @@ const ctx = {
   navigate: (path) => { navigated = path; },
   clearLog() {}, logHasContent: () => true, anyUiOpen: () => false,
   soundcloud: { tracks: [], pickRandom() {} }, analemmaLive: false,
+  history: ['ls', 'status'],
 };
 respond(null, [], ctx);
 const whoamiPool = [
@@ -54,6 +55,14 @@ check('unknown pool echoes raw input', hit);
 ctx.rawInput = 'three body';
 respond(null, [], ctx);
 check('orbital puzzle opens backup portal', navigated === '/orbital.html', navigated);
+
+printed = [];
+respond({ name: 'ls', ui: 'client-task' }, [], ctx);
+check('expanded matrix command dispatches', printed.some((line) => line.includes('readme.txt')));
+
+printed = [];
+respond({ name: 'calc', ui: 'client-task' }, ['3', '*', '18'], ctx);
+check('safe calculator evaluates arithmetic', printed[0] === '54', printed[0]);
 
 // play with empty vault -> empty variant, no panel
 let panelOpened = false;
