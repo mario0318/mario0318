@@ -133,7 +133,11 @@
     import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
     import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-    const app=initializeApp({apiKey:'AIzaSyDyBzyRfNs_f-WlP6qGyQBhVB-w6bWIrU8',authDomain:'mario0318-terminal-live.firebaseapp.com',projectId:'mario0318-terminal-live',appId:'1:526649182798:web:a6eed4b37970138f0d911f',messagingSenderId:'526649182798'});
+    const firebaseConfig=await fetch('/__/firebase/init.json').then(response=>{
+      if(!response.ok)throw new Error(`Firebase configuration unavailable (${response.status})`);
+      return response.json();
+    });
+    const app=initializeApp(firebaseConfig);
     const auth=getAuth(app),db=getFirestore(app),provider=new GoogleAuthProvider();
     provider.setCustomParameters({login_hint:'mario0318@gmail.com'});
     const byId=id=>document.getElementById(id);let currentUser=null;

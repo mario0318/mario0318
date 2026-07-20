@@ -14,7 +14,7 @@ const $ = (id) => document.getElementById(id);
 const el = { term: null, out: null, cmd: null, dots: null, portal: null, panel: null };
 
 const MAX_LINES = 500;
-const LIVE_CONFIG_URL = 'https://firestore.googleapis.com/v1/projects/mario0318-terminal-live/databases/(default)/documents/terminal/config?key=AIzaSyDyBzyRfNs_f-WlP6qGyQBhVB-w6bWIrU8';
+const LIVE_CONFIG_URL = 'https://firestore.googleapis.com/v1/projects/mario0318-terminal-live/databases/(default)/documents/terminal/config';
 const LIVE_CACHE_KEY = 'mario0318-terminal-live-config-v1';
 const LIVE_CACHE_TTL = 5 * 60 * 1000;
 
