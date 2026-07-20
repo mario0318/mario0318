@@ -133,7 +133,7 @@
     import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js';
     import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js';
 
-    const firebaseConfig=await fetch('/__/firebase/init.json').then(response=>{
+    const firebaseConfig=await fetch('/firebase-config.json',{cache:'no-store'}).then(response=>{
       if(!response.ok)throw new Error(`Firebase configuration unavailable (${response.status})`);
       return response.json();
     });

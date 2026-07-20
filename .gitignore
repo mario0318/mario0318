@@ -1,5 +1,6 @@
 .firebase/
 firebase-debug.log
+admin/firebase-config.json
 .gh-auth-output.txt
 .gh-auth-error.txt
 node_modules/
