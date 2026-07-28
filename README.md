@@ -1,35 +1,24 @@
-# mario0318.com
+# mario0318
 
-Standalone source for the public mario0318 terminal.
+Hi, I'm Mario.
 
-## Runtime
+I build software, websites, experiments, and the occasional unnecessarily
+interesting interface.
 
-- `server.js` serves static files from `public/`.
-- `/` resolves to `public/index.html`.
-- The terminal uses native ES modules with no framework or build step.
-- Public commands are declared in `public/commands.public.json`.
-- Applets are lazy-loaded from `public/applets/`.
+This profile is a profile, not a technical paper, so here is the useful
+version:
 
-## Local preview
+- [mario0318.com](https://mario0318.com) is my interactive home base.
+- [raul3.com](https://raul3.com) is where I collect builder work and R3 projects.
+- [sprime.io](https://sprime.io) and [sprime.us](https://sprime.us) are ongoing product and infrastructure work.
+- [dapp.cam](https://dapp.cam) is a visual conversation project.
+- [Fairchild Alchemy](https://fairchildalchemy.com) is for handmade objects, curiosities, and things worth keeping.
 
-```powershell
-npm start
-```
+I like tools with personality, clear interfaces, and ideas that make it out of
+the notebook. I use AI and automation when they make the work better, not just
+longer.
 
-Open `http://localhost:8080`.
+If you want to say hello, email [hi@mario0318.com](mailto:hi@mario0318.com).
 
-## Tests
-
-```powershell
-npm test
-```
-
-## Deployment
-
-The Cloud Run target is `mario0318-site` in project `r3-m318`, region `us-central1`.
-
-```powershell
-.\deploy-mario0318.ps1
-```
-
-Deployment is intentionally manual.
+You can also start at [mario0318.com](https://mario0318.com), where the links
+are a little less normal but hopefully more fun.
