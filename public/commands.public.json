@@ -60,6 +60,17 @@
     {"name":"temp","ui":"client-task","category":"data","listed":false},{"name":"backup","ui":"client-task","category":"data","listed":false},
     {"name":"config","ui":"client-task","category":"data","listed":false},{"name":"cmatrix","ui":"client-task","category":"visual","listed":false},
     {"name":"ascii_art","ui":"client-task","category":"visual","listed":false},{"name":"banner","ui":"client-task","category":"visual","listed":false},
-    {"name":"auth","ui":"client-task","category":"admin","listed":false},{"name":"permit","ui":"client-task","category":"admin","listed":false}
+    {"name":"auth","ui":"client-task","category":"admin","listed":false},{"name":"permit","ui":"client-task","category":"admin","listed":false},
+    {"name":"mkdir","ui":"client-task","category":"maintenance","listed":false},{"name":"touch","ui":"client-task","category":"maintenance","listed":false},
+    {"name":"rm","ui":"client-task","category":"maintenance","listed":false},{"name":"mv","ui":"client-task","category":"maintenance","listed":false},
+    {"name":"cp","ui":"client-task","category":"maintenance","listed":false},{"name":"chmod","ui":"client-task","category":"maintenance","listed":false},
+    {"name":"find","ui":"client-task","category":"system","listed":false},{"name":"which","ui":"client-task","category":"system","listed":false},
+    {"name":"alias","ui":"client-task","category":"system","listed":false},{"name":"jobs","ui":"client-task","category":"system","listed":false},
+    {"name":"uptime","ui":"client-task","category":"system","listed":false},{"name":"hostname","ui":"client-task","category":"system","listed":false},
+    {"name":"lscpu","ui":"client-task","category":"system","listed":false},{"name":"neofetch","ui":"client-task","category":"system","listed":false},
+    {"name":"fortune","ui":"client-task","category":"lore","listed":false},{"name":"coffee","ui":"client-task","category":"lore","listed":false},
+    {"name":"curl","ui":"client-task","category":"network","listed":false},{"name":"wget","ui":"client-task","category":"network","listed":false},
+    {"name":"wc","ui":"client-task","category":"utility","listed":false},{"name":"head","ui":"client-task","category":"utility","listed":false},
+    {"name":"tail","ui":"client-task","category":"utility","listed":false}
   ]
 }

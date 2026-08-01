@@ -1,5 +1,16 @@
 // Safe, browser-local command simulations. Nothing here reaches a shell or arbitrary network target.
+import { startGame } from './terminal-games.js';
+
 const session = { cwd: '~', cone: false, idle: false, clicks: 0, number: null };
+const GAME_NAMES = ['tictactoe', 'hangman', 'snake', 'dungeon', 'wordle', 'memory', 'quiz', 'pong', 'tetris', 'maze', 'mastermind', 'sudoku'];
+const FORTUNES = [
+  'a watched dot never breathes faster.',
+  'the terminal remembers what you clear.',
+  'three bodies, one gravity.',
+  'somewhere a cone is holding a line.',
+  'the shortest path between two prompts is a command.',
+];
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const files = {
   'readme.txt': ['mario0318 terminal', 'projects, experiments, signals, and one quiet orbital backup.'],
@@ -47,29 +58,11 @@ const staticLines = {
   banner: ['M  A  R  I  O  0  3  1  8'],
 };
 
-const gameNotes = {
-  tictactoe: 'tic-tac-toe board staged. coordinates accepted: A1 through C3.',
-  hangman: 'hangman selected. the word is still refusing disclosure.',
-  snake: 'snake loaded in text mode. it immediately reconsidered the viewport.',
-  dungeon: 'you stand in a small room. exits: north, terminal.',
-  wordle: 'wordle chamber ready. submit a five-letter guess after the command.',
-  memory: 'sequence: M 3 1 8. repeat it before the tab forgets.',
-  quiz: 'question: what date is encoded by 0318? answer with `quiz march 18`.',
-  clicker: null,
-  pong: 'pong initialized. left paddle claims jurisdiction.',
-  tetris: 'blocks queued. gravity remains a design constraint.',
-  maze: 'maze generated. every route eventually returns to the prompt.',
-  mastermind: 'mastermind code has four symbols. suspicion is encouraged.',
-  sudoku: 'sudoku grid reserved. no accidental `sudo` privileges granted.',
-};
-
 export function respondUtility(name, args, ctx) {
   const out = (line = '') => ctx.print(line);
   if (staticLines[name]) { staticLines[name].forEach(out); return true; }
-  if (gameNotes[name] !== undefined) {
-    if (name === 'clicker') out(`signal count: ${++session.clicks}`); else out(gameNotes[name]);
-    return true;
-  }
+  if (name === 'clicker') { out(`signal count: ${++session.clicks}`); return true; }
+  if (GAME_NAMES.includes(name)) { startGame(name, args, ctx); return true; }
   if (name === 'ls') { out('drwxr-xr-x  visitor  projects/'); Object.keys(files).forEach(f=>out(`-rw-r--r--  visitor  ${f}`)); return true; }
   if (name === 'cat') { const key=args[0]||'motd'; (files[key]||[`cat: ${key}: no such signal`]).forEach(out); return true; }
   if (name === 'cd') { session.cwd=args[0]||'~'; out(`path: ${session.cwd}`); return true; }
@@ -89,5 +82,25 @@ export function respondUtility(name, args, ctx) {
   if (name === 'auth' || name === 'permit') { out('guest session confirmed. privilege escalation unavailable.'); return true; }
   if (name === 'log') { staticLines.watch.forEach(out); return true; }
   if (name === 'man') { out('matrix commands: system · cone · games · network · lore · maintenance · utility'); out('try `ls`, `status`, `number`, `ping`, `about`, `calc`, or `orbit`.'); return true; }
+  if (name === 'mkdir') { out(`created ${args[0]||'folder'}/. it will not survive a refresh.`); return true; }
+  if (name === 'touch') { out(`touched ${args[0]||'file'}. timestamp updated, substance unchanged.`); return true; }
+  if (name === 'rm') { out(`rm: ${args[0]||'file'}: permission theoretically granted, action withheld.`); return true; }
+  if (name === 'mv') { out(`moved ${args[0]||'a'} -> ${args[1]||'b'}. nothing actually left.`); return true; }
+  if (name === 'cp') { out(`copied ${args[0]||'a'} -> ${args[1]||'b'}. now there are two illusions.`); return true; }
+  if (name === 'chmod') { out(`chmod ${args[0]||'000'} applied to ${args[1]||'file'}: cosmetic only.`); return true; }
+  if (name === 'find') { const q=args[0]||''; const hit=Object.keys(files).find(f=>f.includes(q)); out(hit?`./${hit}`:`find: nothing matching "${q}".`); return true; }
+  if (name === 'which') { out(`${args[0]||'that'}: /bin/m318/${args[0]||'unknown'} (simulated binary)`); return true; }
+  if (name === 'alias') { out("ll='ls -la'"); out("g='git status --imaginary'"); out("cone='echo /\\\\'"); return true; }
+  if (name === 'jobs') { out('no background jobs. everything here is foreground, on purpose.'); return true; }
+  if (name === 'uptime') { out(`up ${Math.floor(performance.now()/1000)}s, 1 user, load average: calm.`); return true; }
+  if (name === 'hostname') { out('m318-web-0318'); return true; }
+  if (name === 'fortune') { out(pick(FORTUNES)); return true; }
+  if (name === 'coffee') { out("418: i'm a teapot. still no coffee."); return true; }
+  if (name === 'lscpu') { out('architecture: imaginary'); out('cores: 3 (one per dot)'); out('model: cone-class'); return true; }
+  if (name === 'neofetch') { out('   /\\        guest@m318'); out('  /  \\       -----------'); out(' /____\\      os: signal-web'); out('/|    |\\     shell: /bin/m318'); out(`uptime: ${Math.floor(performance.now()/1000)}s`); return true; }
+  if (name === 'curl' || name === 'wget') { out(`${name}: network egress disabled in this shell. nice try though.`); return true; }
+  if (name === 'wc') { const key=args[0]; const lines=files[key]; if(!lines){out(`wc: ${key||'file'}: no such signal`);return true;} const words=lines.join(' ').split(/\s+/).filter(Boolean).length; const chars=lines.join('\n').length; out(`${lines.length} ${words} ${chars} ${key}`); return true; }
+  if (name === 'head') { const key=args[0]||'motd'; (files[key]||[`head: ${key}: no such signal`]).slice(0,1).forEach(out); return true; }
+  if (name === 'tail') { const key=args[0]||'motd'; const lines=files[key]||[`tail: ${key}: no such signal`]; lines.slice(-1).forEach(out); return true; }
   return false;
 }

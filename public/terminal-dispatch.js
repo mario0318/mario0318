@@ -24,10 +24,20 @@
 //   - unresolved commands share one path, pool, and timing
 //   - every printed string flows through pickLine/formatLine; no ad-hoc copy
 
-import { pickLine, formatLine, pickEaster, helpKeysLines } from './terminal-responses.js';
+import { pickLine, formatLine, pickEaster, pickChatter, helpKeysLines } from './terminal-responses.js';
 import { respondUtility } from './terminal-utilities.js';
+import { isGameActive, gameInput } from './terminal-games.js';
 
+// respond() returns true when the input produced a real outcome (dots -> ok)
+// and false for unknown/hidden/error paths (dots -> err). See terminal.js run().
 export function respond(command, args, ctx) {
+  // A running mini-game owns input ahead of the registry — except the two
+  // universal UI escapes, which must always work no matter what's active.
+  if (isGameActive() && !(command && (command.name === 'clear' || command.name === 'close'))) {
+    const raw = ctx.rawInput.trim();
+    if (gameInput(raw, raw.split(/\s+/).slice(1), ctx)) return true;
+  }
+
   if (!command) {
     const raw = ctx.rawInput.trim();
     const normalized = raw.toLowerCase().replace(/\s+/g, ' ');
@@ -35,31 +45,32 @@ export function respond(command, args, ctx) {
       const line = pickLine('easter', 'orbit');
       if (line) ctx.print(line);
       ctx.navigate?.('/orbital.html');
-      return;
+      return true;
     }
     const line =
       pickEaster(raw) ||
+      pickChatter(raw) ||
       formatLine(pickLine('unknown'), { input: raw });
     if (line) ctx.print(line);
-    return;
+    return false;
   }
 
   switch (command.name) {
     case 'help': {
       if (args[0] === 'keys') {
         for (const l of helpKeysLines()) ctx.print(l);
-        return;
+        return true;
       }
       const line = pickLine('help');
       if (line) ctx.print(line);
       printHelpList(ctx);
-      return;
+      return true;
     }
 
     case 'projects': {
       say(ctx, 'projects');
       ctx.openPortal('projects');
-      return;
+      return true;
     }
 
     case 'play': {
@@ -67,70 +78,70 @@ export function respond(command, args, ctx) {
         const sc = ctx.soundcloud;
         if (!sc || !sc.tracks || sc.tracks.length === 0) {
           say(ctx, 'play', 'empty');
-          return;
+          return true;
         }
         say(ctx, 'play', 'list');
         ctx.openPortal('play-list', sc.tracks);
-        return;
+        return true;
       }
       const sc = ctx.soundcloud;
       if (!sc || !sc.tracks || sc.tracks.length === 0) {
         say(ctx, 'play', 'empty');
-        return;
+        return true;
       }
       const track = sc.pickRandom();
       const line = formatLine(pickLine('play'), { title: track.title });
       if (line) ctx.print(line);
       ctx.openPanel('soundcloud', track);
-      return;
+      return true;
     }
 
     case 'analemma': {
       say(ctx, 'analemma', ctx.analemmaLive ? 'default' : 'teaser');
       ctx.openPanel('analemma');
-      return;
+      return true;
     }
 
     case 'dots': {
       say(ctx, 'easter', 'dotsLabOpen');
       ctx.openInlineApplet('dots-lab');
-      return;
+      return true;
     }
 
     case 'contact': {
       say(ctx, 'contact');
       ctx.openPortal('contact');
-      return;
+      return true;
     }
 
     case 'clear': {
       const variant = ctx.logHasContent() ? 'default' : 'nothing';
       ctx.clearLog();
       say(ctx, 'clear', variant);
-      return;
+      return true;
     }
 
     case 'close': {
       const variant = ctx.anyUiOpen() ? 'default' : 'nothing';
       ctx.closeAll();
       say(ctx, 'close', variant);
-      return;
+      return true;
     }
 
     default: {
-      if (respondUtility(command.name, args, ctx)) return;
+      if (respondUtility(command.name, args, ctx)) return true;
       if (command.action?.type === 'response' || command.action?.type === 'client-task') {
         const custom = pickLine(command.responsePool || command.name);
         if (custom) {
           ctx.print(formatLine(custom, { input: ctx.rawInput.trim() }));
-          return;
+          return true;
         }
       }
       // Unhandled and server-side actions share the unknown path.
       const raw = ctx.rawInput.trim();
       const line = formatLine(pickLine('unknown'), { input: raw });
       if (line) ctx.print(line);
-      return;
+      return false;
     }
   }
 }

@@ -297,15 +297,15 @@ async function run(raw) {
   };
 
   const before = el.out.childElementCount;
-  respond(command, args, ctx);
+  const handled = respond(command, args, ctx);
   const produced = el.out.childElementCount > before;
 
-  if (!command) {
+  if (handled) {
+    setDots('ok');
+  } else {
     const last = el.out.lastElementChild;
     if (last && produced) last.classList.add('shiver');
     setDots('err');
-  } else {
-    setDots('ok');
   }
   stagger = 0;
 }

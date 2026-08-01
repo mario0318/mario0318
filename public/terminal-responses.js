@@ -123,6 +123,56 @@ let responsePools = {
       'old signal acquired. stepping sideways.',
     ],
   },
+
+  // loose keyword reactions to whatever wasn't a command. dumber than it looks,
+  // matched on plain substrings/regex, no model, no memory past this line.
+  chatter: {
+    farewell: [
+      'already? fine. the tab will still be here.',
+      'bye. this refreshes and forgets everything anyway.',
+      'leaving noted. nothing was saved.',
+    ],
+    thanks: [
+      'sure.',
+      "don't mention it. literally, there's nothing to mention.",
+      'noted. gratitude logged nowhere.',
+    ],
+    identity: [
+      'a terminal. text pretending to be a machine.',
+      'not going to answer that one directly.',
+      'the interface is text. the system is pretending to be larger than it is.',
+    ],
+    wellbeing: [
+      'running. no complaints from the process table.',
+      'stable. same as every other tab.',
+      "fine. it's a website, hard to have a bad day.",
+    ],
+    compliment: [
+      'noted, with mild suspicion.',
+      "appreciated. don't let it go to the cone's head.",
+      'thanks. the dots heard that too.',
+    ],
+    insult: [
+      "fair. it's still not going to do anything about it.",
+      'heard. filed under feedback, never read.',
+      "that's valid. type `help` when you're done.",
+    ],
+    helpseek: [
+      'type `help` for the short version.',
+      'start with `help`. the rest is `man`.',
+      '`help` exists for exactly this.',
+    ],
+    place: [
+      'a personal terminal. some things here got built, most got typed.',
+      "mario0318's corner. type `about` for the short version.",
+      "you're inside a website pretending to be a shell.",
+    ],
+    question: [
+      "that's a real question. this isn't a real answer machine. try `help`.",
+      'questions go to `help` or `man`. this terminal just reacts.',
+      'good question. wrong terminal for it.',
+    ],
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -213,5 +263,26 @@ export function pickEaster(rawInput) {
   if (raw === 'rm -rf /' || raw === 'rm -rf /*') return pickLine('easter', 'rmrf');
   if (raw === 'hello' || raw === 'hi' || raw === 'hey') return pickLine('easter', 'hello');
   if (raw === '42') return pickLine('easter', 'fortyTwo');
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// chatter: loose, keyword-level reactions for whatever isn't a real command
+// and isn't a listed easter egg. Plain substring/regex matching, checked in
+// order, first hit wins. Not a conversation engine — a dumb reflex layer.
+// ---------------------------------------------------------------------------
+
+export function pickChatter(rawInput) {
+  const raw = (rawInput || '').trim().toLowerCase();
+  if (!raw) return null;
+  if (/^(bye|goodbye|good ?night|see ya|cya|later)\b/.test(raw)) return pickLine('chatter', 'farewell');
+  if (/\b(thanks|thank you|thx|ty)\b/.test(raw)) return pickLine('chatter', 'thanks');
+  if (/(who are you|what are you|are you (real|alive|ai|a bot|human|sentient))/.test(raw)) return pickLine('chatter', 'identity');
+  if (/(how are you|how'?s it going|how (are|you) doing)/.test(raw)) return pickLine('chatter', 'wellbeing');
+  if (/(i love (you|this)|this is (cool|awesome|sick|great)|nice (site|terminal|work))/.test(raw)) return pickLine('chatter', 'compliment');
+  if (/(fuck you|screw you|you suck|this sucks|stupid (thing|terminal|site))/.test(raw)) return pickLine('chatter', 'insult');
+  if (/(help me|what can you do|what do you do)\b/.test(raw)) return pickLine('chatter', 'helpseek');
+  if (/(what is this( place)?\??$|where am i)/.test(raw)) return pickLine('chatter', 'place');
+  if (raw.endsWith('?')) return pickLine('chatter', 'question');
   return null;
 }
