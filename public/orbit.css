@@ -6,8 +6,8 @@
   --blue: #4db8ff;
   --green: #55e09a;
   --gray: #9ab4c6;
-  --orb-size: clamp(4.5rem, 9vw, 8rem);
-  --child-size: clamp(3rem, 5.5vw, 4.8rem);
+  --orb-size: clamp(3.25rem, 6vw, 5rem);
+  --child-size: clamp(2.25rem, 4vw, 3.4rem);
   --ease-out: cubic-bezier(.2,.8,.2,1);
 }
 
@@ -130,7 +130,7 @@ a {
     radial-gradient(circle at center, var(--node-color), color-mix(in srgb, var(--node-color) 52%, #020407));
   box-shadow:
     0 0 1.2rem color-mix(in srgb, var(--node-color) 48%, transparent),
-    0 0 4.5rem color-mix(in srgb, var(--node-color) 24%, transparent),
+    0 0 5.5rem color-mix(in srgb, var(--node-color) 30%, transparent),
     inset -1rem -1.1rem 1.8rem rgba(0,0,0,.22);
   transition: transform 180ms var(--ease-out), opacity 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
 }
@@ -141,10 +141,10 @@ a {
   position: absolute;
   width: calc(var(--orb-size) + 1rem);
   aspect-ratio: 1;
-  border: 1px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--node-color) 30%, transparent);
   border-radius: 999px;
-  opacity: 0;
-  transform: scale(.9);
+  opacity: .3;
+  transform: scale(.94);
   transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out), border-color 180ms var(--ease-out);
 }
 
@@ -239,6 +239,30 @@ a {
   transform: translate(-50%, -50%);
 }
 
+.ambient-orbits {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ambient-ring {
+  position: absolute;
+  left: var(--x, 44%);
+  top: var(--y, 50%);
+  width: var(--size, 34vmin);
+  aspect-ratio: 1;
+  border: 1px solid rgba(154, 180, 198, .12);
+  border-radius: 999px;
+  opacity: .55;
+  transform: translate(-50%, -50%);
+}
+
+.ambient-ring--wide {
+  border-color: rgba(154, 180, 198, .08);
+  opacity: .4;
+}
+
 .orbital-hud {
   position: absolute;
   left: max(1rem, env(safe-area-inset-left));
@@ -265,7 +289,7 @@ a {
 
 .orbital-hud h1 {
   max-width: 11ch;
-  font-size: clamp(2.15rem, 7vw, 5.6rem);
+  font-size: clamp(1.75rem, 4.5vw, 3.2rem);
   letter-spacing: 0;
   line-height: .84;
 }
@@ -351,8 +375,8 @@ a {
 
 @media (max-width: 560px) {
   :root {
-    --orb-size: clamp(4rem, 17vw, 5.7rem);
-    --child-size: clamp(2.75rem, 12vw, 4rem);
+    --orb-size: clamp(3rem, 13vw, 4.2rem);
+    --child-size: clamp(2.2rem, 9vw, 3rem);
   }
 
   .orbital-camera.is-open {

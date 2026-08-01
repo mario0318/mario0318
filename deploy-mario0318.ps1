@@ -1,5 +1,9 @@
 $ErrorActionPreference = "Stop"
 
+# Always deploy from the app directory so `--source .` is this app, never the
+# parent folder — running from C:\Projects once uploaded every sibling project.
+Set-Location $PSScriptRoot
+
 $service = "mario0318-site"
 $region = "us-central1"
 $project = "r3-m318"

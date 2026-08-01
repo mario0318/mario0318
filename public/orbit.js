@@ -25,13 +25,27 @@ const els = {
   breadcrumbs: document.getElementById("breadcrumbs"),
   backButton: document.getElementById("back-button"),
   fallbackList: document.getElementById("fallback-list"),
-  canvas: document.getElementById("atmosphere")
+  canvas: document.getElementById("atmosphere"),
+  ambientRings: document.querySelectorAll(".ambient-ring")
 };
 
 const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 let ctx;
 
+placeAmbientRings();
 init();
+
+// Faint always-on orbit rings, centered on the fixed top pivot so they trace
+// the resting path of the three dots. Static — no per-frame cost.
+function placeAmbientRings() {
+  const pivot = toPercent(TOP_PIVOT);
+  const sizes = { inner: "32vmin", outer: "46vmin" };
+  els.ambientRings.forEach((ring) => {
+    ring.style.setProperty("--x", `${pivot.x}%`);
+    ring.style.setProperty("--y", `${pivot.y}%`);
+    ring.style.setProperty("--size", sizes[ring.dataset.ring] || "38vmin");
+  });
+}
 
 async function init() {
   try {
