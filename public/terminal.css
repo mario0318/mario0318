@@ -17,6 +17,11 @@
   --dot-2:       #ffc14d;
   --dot-3:       #4dd8c7;
 
+  /* mario0318 logo mark colors — used by the header brand dots */
+  --brand-blue:  #2183e6;
+  --brand-green: #23c32b;
+  --brand-gray:  #8d9297;
+
   --ok:          var(--dot-3);
   --warn:        var(--dot-2);
   --err:         var(--dot-1);
@@ -273,9 +278,9 @@ body {
   transition: opacity var(--t-med) var(--ease),
               transform var(--t-med) var(--ease);
 }
-.d1 { background: var(--dot-1); }
-.d2 { background: var(--dot-2); }
-.d3 { background: var(--dot-3); }
+.d1 { background: var(--brand-blue); }
+.d2 { background: var(--brand-green); }
+.d3 { background: var(--brand-gray); }
 
 /* idle: staggered breathing */
 .dots.idle .dot { animation: breathe var(--dot-cycle) var(--ease) infinite; }
