@@ -64,9 +64,19 @@ const portalContent = {
   projects: () => registry.filter((c) => c.category === 'explore' || c.category === 'toys'),
 };
 
+const raul3Links = [
+  ['raul3.com', 'https://raul3.com', 'the builder site'],
+  ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
+  ['dapp.cam', 'https://dapp.cam', 'a visual conversation camera'],
+  ['sprime.io', 'https://sprime.io', 'privacy-preserving age verification'],
+  ['Orbital map', '/orbital.html', 'the three-dot world map'],
+  ['Contact', 'mailto:hi@mario0318.com', 'hi@mario0318.com'],
+];
+
 function openPortal(id, data) {
   el.portal.querySelector('#portal-title').textContent =
-    id === 'identity' ? 'mario0318'
+    id === 'raul3' ? 'raul3.com / mario0318'
+    : id === 'identity' ? 'mario0318'
     : id === 'projects' ? 'things that got built'
     : id === 'contact' ? 'reach out'
     : id === 'play-list' ? 'the vault'
@@ -75,7 +85,18 @@ function openPortal(id, data) {
   const body = el.portal.querySelector('#portal-body');
   body.replaceChildren();
 
-  if (id === 'identity') {
+  if (id === 'raul3') {
+    for (const [label, href, description] of raul3Links) {
+      const a = document.createElement('a');
+      a.className = 'p-item';
+      a.href = href;
+      a.textContent = label;
+      const s = document.createElement('small');
+      s.textContent = description;
+      a.appendChild(s);
+      body.appendChild(a);
+    }
+  } else if (id === 'identity') {
     const links = [
       ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
       ['Contact', 'mailto:hi@mario0318.com', 'hi@mario0318.com'],
@@ -374,8 +395,12 @@ async function boot() {
 
   el.cmd.focus();
 
-  $('identity-channel').addEventListener('click', () => openPortal('identity'));
-  $('projects-channel').addEventListener('click', () => run('projects'));
+  $('raul3-channel').addEventListener('click', () => {
+    const channel = $('raul3-channel');
+    channel.setAttribute('aria-expanded', 'true');
+    openPortal('raul3');
+  });
+  el.portal.addEventListener('close', () => $('raul3-channel').setAttribute('aria-expanded', 'false'));
 
   $('prompt').addEventListener('submit', (e) => {
     e.preventDefault();

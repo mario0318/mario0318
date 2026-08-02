@@ -8,9 +8,9 @@
   <style>html,body{background:#0a0b0d;color:#f3f6ff}</style>
   <meta name="description" content="mario0318 terminal">
   <title>mario0318 terminal</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="/terminal.css">
@@ -27,20 +27,16 @@
   <main id="term" class="term" hidden>
     <header class="term-head">
       <div class="term-id" aria-label="mario0318 web terminal">
-        <div class="dots idle" role="img" aria-label="terminal ready">
-          <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
-        </div>
-        <span class="term-session">mario0318@web</span>
+        <a class="term-logo" href="/" aria-label="mario0318 home">
+          <span class="dots idle" role="img" aria-label="terminal ready">
+            <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+          </span>
+          <span class="term-session">mario0318@web</span>
+        </a>
       </div>
       <nav class="term-channels" aria-label="mario0318 channels">
-        <button id="identity-channel" class="channel channel-identity" type="button" aria-label="mario0318 identity, social, and contact links">
-          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="mario" aria-hidden="true">mario0318</span>
-        </button>
-        <a class="channel channel-raul3" href="https://raul3.com" aria-label="raul3 builder site">
-          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="raul3" aria-hidden="true">raul3</span>
-        </a>
-        <button id="projects-channel" class="channel channel-projects" type="button" aria-label="projects and content">
-          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="work" aria-hidden="true">projects + content</span>
+        <button id="raul3-channel" class="channel channel-raul3" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="portal" aria-label="open raul3.com links">
+          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="raul3.com" aria-hidden="true">raul3.com</span><span class="channel-caret" aria-hidden="true">+</span>
         </button>
       </nav>
     </header>
