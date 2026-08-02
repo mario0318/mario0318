@@ -3,67 +3,116 @@
 <head>
   <meta charset="utf-8">
   <meta name="color-scheme" content="dark">
-  <style>html,body{background:#0a0c10;color:#f3f6ff}</style>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0a0c10">
-  <meta name="description" content="mario0318 orbital interface">
-  <meta property="og:title" content="mario0318 orbital interface">
-  <meta property="og:description" content="A three-dot orbital gate for identity, builds, and worlds.">
-  <title>mario0318</title>
+  <meta name="theme-color" content="#0a0b0d">
+  <meta name="description" content="A small gravity laboratory for experimenting with bodies, masses, and force.">
+  <meta property="og:title" content="Gravity Lab / mario0318">
+  <meta property="og:description" content="Experiment with bodies, mass, and gravity in a live 2D sandbox.">
+  <title>Gravity Lab / mario0318</title>
   <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/orbit.css">
+  <link rel="stylesheet" href="/gravity.css?v=3">
 </head>
 <body>
-  <a class="skip-link" href="#links">Skip to links</a>
+  <a class="skip-link" href="#gravity-controls">Skip to experiment controls</a>
 
-  <main class="orbital-shell">
-    <section class="orbital-stage" aria-label="mario0318 orbital interface">
-      <canvas id="atmosphere" class="atmosphere" aria-hidden="true"></canvas>
+  <main class="gravity-shell">
+    <header class="gravity-header">
+      <div>
+        <p class="eyebrow">mario0318 / physics lab</p>
+        <h1>gravity, made visible</h1>
+        <p class="intro">Place bodies in a quiet field. Change their mass. Watch the paths become the explanation.</p>
+      </div>
+      <div class="sim-status" aria-live="polite">
+        <span id="sim-status-dot" class="status-dot is-running" aria-hidden="true"></span>
+        <span id="sim-status">running</span>
+      </div>
+    </header>
 
-      <div id="ambient-orbits" class="ambient-orbits" aria-hidden="true">
-        <span class="ambient-ring" data-ring="inner"></span>
-        <span class="ambient-ring ambient-ring--wide" data-ring="outer"></span>
+    <section class="gravity-workspace" aria-label="gravity experiment">
+      <div class="gravity-stage-wrap">
+        <div class="stage-meta">
+          <span>2d field / scaled units</span>
+          <span id="stage-hint">click to place a planet</span>
+        </div>
+        <div class="gravity-stage" id="gravity-stage">
+          <canvas id="gravity-canvas" tabindex="0" aria-label="Interactive gravity simulation. Drag a body or click to place the selected body."></canvas>
+          <div class="stage-readout" aria-live="polite">
+            <div><span>elapsed</span><strong id="read-time">0.0 s</strong></div>
+            <div><span>bodies</span><strong id="read-bodies">0</strong></div>
+            <div><span>selected g</span><strong id="read-g">--</strong></div>
+            <div><span>speed</span><strong id="read-speed">--</strong></div>
+          </div>
+        </div>
+        <p class="stage-note">Drag to reposition. The simulation pauses while you move a body.</p>
       </div>
 
-      <div id="orbital-camera" class="orbital-camera">
-        <div id="top-cluster" class="top-cluster" aria-label="primary orbit nodes"></div>
-        <div id="child-orbit-layer" class="child-orbit-layer" aria-live="polite"></div>
-      </div>
+      <aside id="gravity-controls" class="gravity-controls" aria-label="experiment controls">
+        <div class="control-heading">
+          <div>
+            <p class="eyebrow">experiment</p>
+            <h2>field controls</h2>
+          </div>
+          <div class="transport-controls">
+            <button id="play-toggle" class="icon-button" type="button" aria-label="pause simulation">Ⅱ</button>
+            <button id="reset-simulation" class="text-button" type="button">reset</button>
+          </div>
+        </div>
 
-      <aside class="orbital-hud" aria-live="polite">
-        <p class="eyebrow">mario0318</p>
-        <h1 id="status-title">select an orb</h1>
-        <p id="status-copy">the dots are the interface</p>
-        <nav id="breadcrumbs" class="breadcrumbs" aria-label="orbital path"></nav>
-        <button id="back-button" class="back-button" type="button" hidden>Back</button>
+        <div class="control-group">
+          <label class="range-label" for="gravity-scale"><span>gravity scale</span><output id="gravity-scale-value" for="gravity-scale">1.00×</output></label>
+          <input id="gravity-scale" type="range" min="0" max="4" step="0.05" value="1">
+          <p class="control-help">Multiply the field without changing the bodies.</p>
+        </div>
+
+        <div class="control-group">
+          <label class="range-label" for="time-scale"><span>time scale</span><output id="time-scale-value" for="time-scale">1.00×</output></label>
+          <input id="time-scale" type="range" min="0.1" max="2" step="0.05" value="1">
+        </div>
+
+        <div class="control-group">
+          <div class="range-label"><span>add a body</span><span class="control-value">then click the field</span></div>
+          <div class="body-presets" role="group" aria-label="body presets">
+            <button class="preset-button is-active" type="button" data-preset="planet"><span class="preset-dot planet-dot"></span>planet</button>
+            <button class="preset-button" type="button" data-preset="moon"><span class="preset-dot moon-dot"></span>moon</button>
+            <button class="preset-button" type="button" data-preset="star"><span class="preset-dot star-dot"></span>star</button>
+            <button class="preset-button" type="button" data-preset="asteroid"><span class="preset-dot asteroid-dot"></span>asteroid</button>
+          </div>
+        </div>
+
+        <div id="body-inspector" class="control-group inspector" hidden>
+          <div class="inspector-heading">
+            <div>
+              <span class="section-label">selected body</span>
+              <strong id="selected-name">planet</strong>
+            </div>
+            <button id="remove-body" class="remove-button" type="button">remove</button>
+          </div>
+          <label class="range-label" for="body-mass"><span>mass</span><output id="body-mass-value" for="body-mass">700</output></label>
+          <input id="body-mass" type="range" min="1" max="50000" step="1" value="700">
+          <label class="range-label" for="body-radius"><span>radius</span><output id="body-radius-value" for="body-radius">12</output></label>
+          <input id="body-radius" type="range" min="3" max="42" step="1" value="12">
+          <div class="velocity-label"><span>velocity</span><span id="body-velocity-value">0.00, 0.00</span></div>
+          <div class="velocity-grid">
+            <label><span>x</span><input id="body-vx" type="range" min="-2" max="2" step="0.01" value="0"></label>
+            <label><span>y</span><input id="body-vy" type="range" min="-2" max="2" step="0.01" value="0"></label>
+          </div>
+        </div>
+
+        <div class="control-footnote">
+          <span class="footnote-mark">i</span>
+          <p>Mass is relative and gravity is scaled for play. This is an intuition machine, not a mission planner.</p>
+        </div>
       </aside>
     </section>
 
-    <section id="links" class="fallback-links" aria-label="links">
-      <h2>Links</h2>
-      <div id="fallback-list"></div>
-    </section>
+    <footer class="gravity-footer">
+      <span>gravity lab / a mario0318 experiment</span>
+      <a href="/">return to terminal</a>
+    </footer>
   </main>
 
-  <a class="terminal-return" href="/" aria-label="Return to terminal">terminal</a>
-
-  <noscript>
-    <section class="noscript-links" aria-label="links">
-      <h2>Links</h2>
-      <ul>
-        <li><a href="https://raul3.com">raul3</a></li>
-        <li><a href="https://github.com/mario0318">GitHub</a></li>
-        <li><a href="mailto:hi@mario0318.com">Contact</a></li>
-        <li><a href="https://dapp.cam">dapp.cam</a></li>
-        <li><a href="https://fairchildalchemy.com">Fairchild Alchemy</a></li>
-        <li><a href="https://sprime.io">sprime.io</a></li>
-        <li><a href="https://sprime.us">sprime.us</a></li>
-      </ul>
-    </section>
-  </noscript>
-
-  <script type="module" src="/orbit.js"></script>
+  <script type="module" src="/gravity.js?v=2"></script>
 </body>
 </html>

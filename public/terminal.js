@@ -65,17 +65,17 @@ const portalContent = {
 };
 
 const raul3Links = [
-  ['raul3.com', 'https://raul3.com', 'the builder site'],
-  ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
+  ['Raul3', 'https://raul3.com', 'the builder site'],
   ['dapp.cam', 'https://dapp.cam', 'a visual conversation camera'],
   ['sprime.io', 'https://sprime.io', 'privacy-preserving age verification'],
-  ['Orbital map', '/orbital.html', 'the three-dot world map'],
+  ['Gravity lab', '/orbital.html', 'bodies, mass, and force in motion'],
   ['Contact', 'mailto:hi@mario0318.com', 'hi@mario0318.com'],
+  ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
 ];
 
 function openPortal(id, data) {
   el.portal.querySelector('#portal-title').textContent =
-    id === 'raul3' ? 'raul3.com / mario0318'
+    id === 'raul3' ? 'R3 Labs / mario0318'
     : id === 'identity' ? 'mario0318'
     : id === 'projects' ? 'things that got built'
     : id === 'contact' ? 'reach out'
@@ -88,7 +88,7 @@ function openPortal(id, data) {
   if (id === 'raul3') {
     for (const [label, href, description] of raul3Links) {
       const a = document.createElement('a');
-      a.className = 'p-item';
+      a.className = 'p-item p-link';
       a.href = href;
       a.textContent = label;
       const s = document.createElement('small');
@@ -100,11 +100,11 @@ function openPortal(id, data) {
     const links = [
       ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
       ['Contact', 'mailto:hi@mario0318.com', 'hi@mario0318.com'],
-      ['Orbital map', '/orbital.html', 'the three-dot world map'],
+      ['Gravity lab', '/orbital.html', 'bodies, mass, and force in motion'],
     ];
     for (const [label, href, description] of links) {
       const a = document.createElement('a');
-      a.className = 'p-item';
+      a.className = 'p-item p-link';
       a.href = href;
       a.textContent = label;
       const s = document.createElement('small');
@@ -114,7 +114,7 @@ function openPortal(id, data) {
     }
   } else if (id === 'contact') {
     const a = document.createElement('a');
-    a.className = 'p-item';
+    a.className = 'p-item p-link';
     a.href = 'mailto:hi@mario0318.com';
     a.textContent = 'hi@mario0318.com';
     body.appendChild(a);
