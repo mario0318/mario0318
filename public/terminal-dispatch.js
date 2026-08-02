@@ -24,7 +24,7 @@
 //   - unresolved commands share one path, pool, and timing
 //   - every printed string flows through pickLine/formatLine; no ad-hoc copy
 
-import { pickLine, formatLine, pickEaster, pickChatter, helpKeysLines } from './terminal-responses.js';
+import { pickLine, formatLine, pickEaster, pickWordChatter, pickChatter, helpKeysLines } from './terminal-responses.js';
 import { respondUtility } from './terminal-utilities.js';
 import { isGameActive, gameInput } from './terminal-games.js';
 
@@ -49,6 +49,7 @@ export function respond(command, args, ctx) {
     }
     const line =
       pickEaster(raw) ||
+      pickWordChatter(raw) ||
       pickChatter(raw) ||
       formatLine(pickLine('unknown'), { input: raw });
     if (line) ctx.print(line);
