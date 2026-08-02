@@ -3,6 +3,8 @@
 // Rules: lowercase, terse, dry. dispatcher fills placeholders; applets never format.
 // All strings printed via ctx.print -> textContent. No HTML anywhere in here.
 
+import { assistantResponsePools } from './terminal-responses-assistant.js';
+
 let responsePools = {
   help: {
     default: [
@@ -683,6 +685,8 @@ let responsePools = {
       'you are either in sync or in the way.',
     ],
   },
+
+  ...assistantResponsePools,
 };
 
 // aliases resolve to a canonical key in responsePools.words above. "stack" is

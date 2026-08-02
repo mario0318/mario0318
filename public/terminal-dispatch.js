@@ -27,6 +27,7 @@
 import { pickLine, formatLine, pickEaster, pickWordChatter, pickChatter, helpKeysLines } from './terminal-responses.js';
 import { respondUtility } from './terminal-utilities.js';
 import { isGameActive, gameInput } from './terminal-games.js';
+import { respondAssistant } from './terminal-assistant.js';
 
 // respond() returns true when the input produced a real outcome (dots -> ok)
 // and false for unknown/hidden/error paths (dots -> err). See terminal.js run().
@@ -47,12 +48,15 @@ export function respond(command, args, ctx) {
       ctx.navigate?.('/orbital.html');
       return true;
     }
-    const line =
-      pickEaster(raw) ||
-      pickWordChatter(raw) ||
-      pickChatter(raw) ||
-      formatLine(pickLine('unknown'), { input: raw });
-    if (line) ctx.print(line);
+    const line = pickEaster(raw) || pickWordChatter(raw) || pickChatter(raw);
+    if (line) {
+      ctx.print(line);
+      return false;
+    }
+    if (respondAssistant(raw, ctx)) return true;
+
+    const unknown = formatLine(pickLine('unknown'), { input: raw });
+    if (unknown) ctx.print(unknown);
     return false;
   }
 
@@ -138,7 +142,8 @@ export function respond(command, args, ctx) {
           return true;
         }
       }
-      // Unhandled and server-side actions share the unknown path.
+      // Registered commands that have no client implementation keep the
+      // legacy unknown path. The assistant is for unresolved free-form input.
       const raw = ctx.rawInput.trim();
       const line = formatLine(pickLine('unknown'), { input: raw });
       if (line) ctx.print(line);

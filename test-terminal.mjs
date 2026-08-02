@@ -1,5 +1,6 @@
 import { pickLine, formatLine, pickEaster } from './public/terminal-responses.js';
 import { respond, setRegistry } from './public/terminal-dispatch.js';
+import { classifyAssistant, ASSISTANT_BUCKETS } from './public/terminal-assistant-rules.js';
 
 const results = [];
 const check = (name, ok, extra = '') =>
@@ -42,15 +43,15 @@ check('sudo prefix matches', !!pickEaster('sudo make me a sandwich'));
 check('sudo exact matches', !!pickEaster('sudo'));
 check('sudoku is NOT an easter', pickEaster('sudoku') === null);
 
-// unknown echoes {input} somewhere in rotation
-let hit = false;
-ctx.rawInput = 'frobnicate the widget';
-for (let i = 0; i < 8; i++) {
-  printed = [];
-  respond(null, [], ctx);
-  if (printed[0] && printed[0].startsWith('frobnicate the widget:')) { hit = true; break; }
-}
-check('unknown pool echoes raw input', hit);
+check('assistant routes builder language', classifyAssistant('help me ship this api') === ASSISTANT_BUCKETS.BUILDER);
+check('assistant routes lore language', classifyAssistant('the orbital vault is quiet') === ASSISTANT_BUCKETS.LORE);
+check('assistant routes questions to meta', classifyAssistant('how does this work?') === ASSISTANT_BUCKETS.META);
+check('assistant routes game hints with game context', classifyAssistant('i am stuck', { lastCommand: 'game_wordle' }) === ASSISTANT_BUCKETS.GAME);
+
+printed = [];
+ctx.rawInput = 'something the parser has never seen';
+const assistantHandled = respond(null, [], ctx);
+check('assistant handles unresolved free-form input', assistantHandled === true && printed.length === 1);
 
 ctx.rawInput = 'three body';
 respond(null, [], ctx);
