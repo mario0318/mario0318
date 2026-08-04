@@ -68,7 +68,8 @@ const raul3Links = [
   ['Raul3', 'https://raul3.com', 'the builder site'],
   ['dapp.cam', 'https://dapp.cam', 'a visual conversation camera'],
   ['sprime.io', 'https://sprime.io', 'privacy-preserving age verification'],
-  ['Gravity lab', '/orbital.html', 'bodies, mass, and force in motion'],
+  ['Analemma Studio', 'https://raul3.com/analemma/', 'interactive 3D solar geometry'],
+  ['Gravity Lab', 'https://raul3.com/gravity-lab', 'bodies, mass, and force in motion'],
   ['Contact', 'mailto:hi@mario0318.com', 'hi@mario0318.com'],
   ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
 ];
@@ -100,7 +101,8 @@ function openPortal(id, data) {
     const links = [
       ['GitHub', 'https://github.com/mario0318', 'code, releases, and public work'],
       ['Contact', 'mailto:hi@mario0318.com', 'hi@mario0318.com'],
-      ['Gravity lab', '/orbital.html', 'bodies, mass, and force in motion'],
+      ['Analemma Studio', 'https://raul3.com/analemma/', 'interactive 3D solar geometry'],
+      ['Gravity Lab', 'https://raul3.com/gravity-lab', 'bodies, mass, and force in motion'],
     ];
     for (const [label, href, description] of links) {
       const a = document.createElement('a');
