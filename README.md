@@ -1,14 +1,11 @@
-# hey, I'm Raul
+# hey, I'm Raul 👋
 
-I build websites, tools, and interfaces. Some are practical, some are just
-things I wanted to see exist.
+i build websites, tools, and interfaces. some of it pays, some of it exists because i wanted to see it work.
 
-[mario0318.com](https://mario0318.com) is my home base. [raul3.com](https://raul3.com)
-collects builder work under the R3 name. [sprime.io](https://sprime.io) and
-[sprime.us](https://sprime.us) are product and infrastructure work in progress.
-[dapp.cam](https://dapp.cam) is a visual take on conversation, and
-[Fairchild Alchemy](https://fairchildalchemy.com) is for handmade objects and
-curiosities.
+[mario0318.com](https://mario0318.com) is home base and has the rest of the links.
+[raul3.com](https://raul3.com) is builder work under the R3 name.
+[sprime.io](https://sprime.io) is a privacy-first verification product, still in progress.
+[dapp.cam](https://dapp.cam) is a visual take on conversation.
+[Fairchild Alchemy](https://fairchildalchemy.com) sells handmade objects and curiosities.
 
-You can reach me at [hi@mario0318.com](mailto:hi@mario0318.com), or start at
-[mario0318.com](https://mario0318.com) for the rest.
+reach me at [hi@mario0318.com](mailto:hi@mario0318.com).
