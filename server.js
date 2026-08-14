@@ -33,6 +33,9 @@ function resolvePath(urlPath) {
 function serveFile(filePath, response) {
   const extension = path.extname(filePath).toLowerCase();
   const contentType = mimeTypes[extension] || "application/octet-stream";
+  const cacheControl = [".html", ".js", ".css", ".json"].includes(extension)
+    ? "no-cache"
+    : "public, max-age=3600";
 
   fs.readFile(filePath, (error, data) => {
     if (error) {
@@ -43,7 +46,7 @@ function serveFile(filePath, response) {
 
     response.writeHead(200, {
       "Content-Type": contentType,
-      "Cache-Control": extension === ".html" ? "no-cache" : "public, max-age=3600"
+      "Cache-Control": cacheControl
     });
     response.end(data);
   });
