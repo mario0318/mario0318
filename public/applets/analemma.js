@@ -3,14 +3,18 @@ export default {
   title: 'analemma studio',
   ui: 'panel',
   async mount(el) {
-    const card = document.createElement('div');
-    card.className = 'applet-card';
-    const heading = document.createElement('p');
-    heading.textContent = "the studio's catching up.";
-    const link = document.createElement('a');
-    link.href = 'mailto:hi@mario0318.com?subject=Analemma%20Studio';
-    link.textContent = 'notify me';
-    card.append(heading, link); el.appendChild(card);
+    const frame = document.createElement('div');
+    frame.className = 'applet-frame applet-frame-tall';
+
+    const iframe = document.createElement('iframe');
+    iframe.title = 'Analemma Studio';
+    iframe.loading = 'lazy';
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.sandbox = 'allow-scripts allow-same-origin allow-forms allow-popups';
+    iframe.src = 'https://raul3.com/analemma/';
+
+    frame.appendChild(iframe);
+    el.appendChild(frame);
   },
   unmount() {},
 };

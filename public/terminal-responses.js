@@ -8,9 +8,9 @@ import { assistantResponsePools } from './terminal-responses-assistant.js';
 let responsePools = {
   help: {
     default: [
-      'some things you can ask this thing to do. not all of them, on purpose.',
-      "here's a small slice of what works. the rest you'll find the usual way: typing.",
-      "minimal tour coming up. if you're the exhaustive type, you're in the wrong terminal.",
+      'guest commands, no guessing required.',
+      'the command table, as exposed to this session.',
+      'indexing the guest surface. if it is listed here, it should answer.',
     ],
     keys: [
       'keyboard things:',
@@ -41,8 +41,8 @@ let responsePools = {
       'switching to the catalog. pick your own noise.',
     ],
     empty: [
-      "vault's quiet. soundcloud is either sulking or the list is empty.",
-      "couldn't get a track list. try again later. the silence is not a feature.",
+      'the vault has no tracks configured yet. command works; catalog is empty.',
+      'play needs a real track list. this repo currently ships none.',
     ],
   },
 
@@ -53,8 +53,8 @@ let responsePools = {
       'opening analemma in the side channel.',
     ],
     teaser: [
-      "analemma's slot is here. the studio's catching up.",
-      'panel is a teaser for now. the studio moves in later.',
+      "analemma's panel opened, but the live studio url was not confirmed.",
+      'studio slot available. live launch target is undefined.',
     ],
   },
 

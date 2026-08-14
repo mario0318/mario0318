@@ -72,10 +72,43 @@ export function respondUtility(name, args, ctx) {
   if (name === 'grep') { const q=args.join(' ').toLowerCase(); (ctx.history||[]).filter(x=>x.toLowerCase().includes(q)).forEach(out); return true; }
   if (name === 'calc') { const expr=args.join(' '); if(!/^[\d\s+\-*/().%]+$/.test(expr)){out('calc: numbers and arithmetic operators only.');return true} try{out(String(Function(`"use strict";return (${expr})`)()))}catch{out('calc: expression declined.')} return true; }
   if (name === 'timer') { const seconds=Math.min(60,Math.max(0,Number(args[0])||3)); out(`timer armed for ${seconds}s (browser-local).`); window.setTimeout(()=>out(`timer: ${seconds}s elapsed.`),seconds*1000); return true; }
-  if (name === 'cone') { session.cone=!session.cone; out(session.cone?'cone online. /\\':'cone folded back into storage.'); return true; }
+  if (name === 'cone') {
+    session.cone = !session.cone;
+    if (session.cone) {
+      out('cone signal online. it is the site lore/status channel, not a real sensor.');
+      out('try `status`, `glare`, `watch`, `reflect`, or `cone-id`.');
+    } else {
+      out('cone signal offline. lore channel folded back into storage.');
+    }
+    return true;
+  }
   if (name === 'idle') { session.idle=!session.idle; out(session.idle?'low-energy watch enabled.':'full signal restored.'); return true; }
   if (name === 'sort') { out(['builder','observer','signal keeper','professional tab opener'][Math.floor(Math.random()*4)]); return true; }
-  if (name === 'number') { if(session.number==null){session.number=1+Math.floor(Math.random()*100);out('number locked from 1–100. try `number 42`.');return true} const n=Number(args[0]);if(!n){out('give me a number.');return true}if(n===session.number){out('correct. resetting the field.');session.number=null}else out(n<session.number?'higher.':'lower.');return true; }
+  if (name === 'number') {
+    if (args[0] === 'reset' || args[0] === 'stop') {
+      session.number = null;
+      out('number game reset.');
+      return true;
+    }
+    if (session.number == null) session.number = 1 + Math.floor(Math.random() * 100);
+    if (!args.length) {
+      out('number game active: guess an integer from 1 to 100.');
+      out('syntax: `number <guess>` · example: `number 37` · reset: `number reset`');
+      return true;
+    }
+    const n = Number(args[0]);
+    if (!Number.isInteger(n) || n < 1 || n > 100) {
+      out('give me an integer from 1 to 100.');
+      return true;
+    }
+    if (n === session.number) {
+      out('correct. resetting the field.');
+      session.number = null;
+    } else {
+      out(n < session.number ? 'higher.' : 'lower.');
+    }
+    return true;
+  }
   if (name === 'rps') { const pick=['rock','paper','scissors'][Math.floor(Math.random()*3)],you=(args[0]||'rock').toLowerCase();out(`you: ${you} · terminal: ${pick}`);return true; }
   if (['ping','traceroute','nslookup','dig','ssh','telnet','ftp'].includes(name)) { const target=args[0]||'orbital.gateway'; out(`${name}: simulated route to ${target}`); out('reply: 3.18 ms · no external connection made'); return true; }
   if (name === 'kill' || name === 'umount') { out(`${name}: operation refused by imaginary kernel.`); return true; }

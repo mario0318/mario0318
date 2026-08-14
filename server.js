@@ -49,8 +49,35 @@ function serveFile(filePath, response) {
   });
 }
 
+function redirect(response, location) {
+  // 301 permanent so Google consolidates signals onto the canonical URL.
+  response.writeHead(301, { Location: location });
+  response.end();
+}
+
 const server = http.createServer((request, response) => {
-  const filePath = resolvePath(request.url || "/");
+  const url = request.url || "/";
+  const host = (request.headers.host || "").toLowerCase();
+  const pathname = url.split("?")[0];
+  const query = url.slice(pathname.length); // "" or "?..."
+
+  // Canonical host: collapse www. onto the apex.
+  if (host.startsWith("www.")) {
+    redirect(response, `https://${host.slice(4)}${url}`);
+    return;
+  }
+
+  // Canonical paths: kill duplicate URLs.
+  if (pathname === "/index.html") {
+    redirect(response, `/${query}`);
+    return;
+  }
+  if (pathname === "/orbital") {
+    redirect(response, `/orbital.html${query}`);
+    return;
+  }
+
+  const filePath = resolvePath(url);
 
   if (!filePath) {
     response.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
@@ -64,11 +91,7 @@ const server = http.createServer((request, response) => {
       return;
     }
 
-    if (!path.extname(filePath)) {
-      serveFile(path.join(rootDir, "index.html"), response);
-      return;
-    }
-
+    // No SPA fallback: unknown paths are real 404s, not soft-404 duplicates.
     response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
     response.end("Not Found");
   });

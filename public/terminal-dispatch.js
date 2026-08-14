@@ -31,7 +31,7 @@ import { respondAssistant } from './terminal-assistant.js';
 
 // respond() returns true when the input produced a real outcome (dots -> ok)
 // and false for unknown/hidden/error paths (dots -> err). See terminal.js run().
-export function respond(command, args, ctx) {
+export async function respond(command, args, ctx) {
   // A running mini-game owns input ahead of the registry — except the two
   // universal UI escapes, which must always work no matter what's active.
   if (isGameActive() && !(command && (command.name === 'clear' || command.name === 'close'))) {
@@ -48,12 +48,17 @@ export function respond(command, args, ctx) {
       ctx.navigate?.('/orbital.html');
       return true;
     }
-    const line = pickEaster(raw) || pickWordChatter(raw) || pickChatter(raw);
+    const line = pickEaster(raw) || pickWordChatter(raw);
     if (line) {
       ctx.print(line);
       return false;
     }
     if (respondAssistant(raw, ctx)) return true;
+    const chatter = pickChatter(raw);
+    if (chatter) {
+      ctx.print(chatter);
+      return false;
+    }
 
     const unknown = formatLine(pickLine('unknown'), { input: raw });
     if (unknown) ctx.print(unknown);
@@ -66,9 +71,19 @@ export function respond(command, args, ctx) {
         for (const l of helpKeysLines()) ctx.print(l);
         return true;
       }
+      if (args[0]) {
+        printCommandDetail(ctx, args[0]);
+        return true;
+      }
       const line = pickLine('help');
       if (line) ctx.print(line);
       printHelpList(ctx);
+      return true;
+    }
+
+    case 'man': {
+      if (args[0]) printCommandDetail(ctx, args[0]);
+      else printHelpIntro(ctx);
       return true;
     }
 
@@ -97,19 +112,19 @@ export function respond(command, args, ctx) {
       const track = sc.pickRandom();
       const line = formatLine(pickLine('play'), { title: track.title });
       if (line) ctx.print(line);
-      ctx.openPanel('soundcloud', track);
+      await ctx.openPanel('soundcloud', track);
       return true;
     }
 
     case 'analemma': {
       say(ctx, 'analemma', ctx.analemmaLive ? 'default' : 'teaser');
-      ctx.openPanel('analemma');
+      await ctx.openPanel('analemma');
       return true;
     }
 
     case 'dots': {
       say(ctx, 'easter', 'dotsLabOpen');
-      ctx.openInlineApplet('dots-lab');
+      await ctx.openInlineApplet('dots-lab');
       return true;
     }
 
@@ -166,14 +181,149 @@ export function setRegistry(commands) {
   registry = commands;
 }
 
+const CATEGORY_LABELS = {
+  core: 'core',
+  explore: 'places',
+  toys: 'toys',
+  system: 'system',
+  utility: 'utility',
+  cone: 'cone',
+  games: 'games',
+  network: 'network',
+  lore: 'lore',
+  maintenance: 'maintenance',
+  data: 'data',
+  visual: 'visual',
+};
+
+const CATEGORY_ORDER = ['core', 'explore', 'toys', 'system', 'utility', 'cone', 'games', 'network', 'lore', 'maintenance', 'data', 'visual'];
+
+const CATEGORY_DESCRIPTIONS = {
+  system: 'simulated shell/system command',
+  utility: 'browser-local utility',
+  cone: 'traffic-cone lore/control command',
+  games: 'browser-local mini-game',
+  network: 'simulated network command',
+  lore: 'site lore response',
+  maintenance: 'simulated maintenance command',
+  data: 'simulated data command',
+  visual: 'visual terminal output',
+};
+
+const DESCRIPTION_OVERRIDES = {
+  play: 'vault player status',
+  cone: 'toggle cone lore channel',
+  number: 'higher/lower 1-100 game',
+};
+
+const COMMAND_GUIDE = {
+  help: { syntax: 'help [command] | help keys', examples: ['help number', 'help keys'] },
+  projects: { syntax: 'projects', examples: ['projects'] },
+  play: { syntax: 'play | play list | play next', examples: ['play', 'play list'] },
+  analemma: { syntax: 'analemma', examples: ['analemma'] },
+  dots: { syntax: 'dots', examples: ['dots'] },
+  contact: { syntax: 'contact', examples: ['contact'] },
+  clear: { syntax: 'clear', examples: ['clear'] },
+  close: { syntax: 'close', examples: ['close'] },
+  ls: { syntax: 'ls', examples: ['ls'] },
+  cat: { syntax: 'cat [readme.txt|cone.log|motd]', examples: ['cat readme.txt'] },
+  cd: { syntax: 'cd [path]', examples: ['cd projects'] },
+  history: { syntax: 'history', examples: ['history'] },
+  date: { syntax: 'date', examples: ['date'] },
+  man: { syntax: 'man [command]', examples: ['man cone'] },
+  grep: { syntax: 'grep <history text>', examples: ['grep play'] },
+  top: { syntax: 'top', examples: ['top'] },
+  echo: { syntax: 'echo <text>', examples: ['echo signal'] },
+  calc: { syntax: 'calc <arithmetic>', examples: ['calc 3 * 18'] },
+  timer: { syntax: 'timer [seconds 0-60]', examples: ['timer 5'] },
+  cone: { syntax: 'cone', examples: ['cone', 'status'] },
+  rps: { syntax: 'rps [rock|paper|scissors]', examples: ['rps scissors'] },
+  number: { syntax: 'number | number <1-100>', examples: ['number', 'number 37'] },
+  ping: { syntax: 'ping [target]', examples: ['ping orbital.gateway'] },
+  traceroute: { syntax: 'traceroute [target]', examples: ['traceroute raul3.com'] },
+  nslookup: { syntax: 'nslookup [target]', examples: ['nslookup mario0318.com'] },
+  dig: { syntax: 'dig [target]', examples: ['dig dapp.cam'] },
+  ssh: { syntax: 'ssh [target]', examples: ['ssh orbital.gateway'] },
+  telnet: { syntax: 'telnet [target]', examples: ['telnet orbital.gateway'] },
+  ftp: { syntax: 'ftp [target]', examples: ['ftp vault'] },
+  mkdir: { syntax: 'mkdir <name>', examples: ['mkdir scratch'] },
+  touch: { syntax: 'touch <name>', examples: ['touch note.txt'] },
+  rm: { syntax: 'rm <name>', examples: ['rm note.txt'] },
+  mv: { syntax: 'mv <from> <to>', examples: ['mv a b'] },
+  cp: { syntax: 'cp <from> <to>', examples: ['cp a b'] },
+  chmod: { syntax: 'chmod <mode> <name>', examples: ['chmod 644 note.txt'] },
+  find: { syntax: 'find [text]', examples: ['find cone'] },
+  which: { syntax: 'which <command>', examples: ['which calc'] },
+  wc: { syntax: 'wc <file>', examples: ['wc motd'] },
+  head: { syntax: 'head [file]', examples: ['head readme.txt'] },
+  tail: { syntax: 'tail [file]', examples: ['tail cone.log'] },
+};
+
+function commandVisibleToGuests(command) {
+  return command && command.enabled !== false && command.category !== 'admin';
+}
+
+function visibleRegistry() {
+  return registry.filter(commandVisibleToGuests);
+}
+
+function commandLabel(command) {
+  const aliases = (command.aliases || []).filter(Boolean);
+  return aliases.length ? `${command.name} (${aliases.join(', ')})` : command.name;
+}
+
+function commandDescription(command) {
+  if (DESCRIPTION_OVERRIDES[command.name]) return DESCRIPTION_OVERRIDES[command.name];
+  return command.desc || CATEGORY_DESCRIPTIONS[command.category] || 'browser-local command';
+}
+
+function resolveCommandForHelp(name) {
+  const needle = String(name || '').toLowerCase();
+  return visibleRegistry().find((command) => command.name === needle || (command.aliases || []).includes(needle));
+}
+
 function printHelpList(ctx) {
   ctx.print('');
-  const listed = registry.filter((c) => c.listed);
-  const pad = Math.max(...listed.map((c) => c.name.length), 8) + 4;
-  for (const c of listed) {
-    ctx.print(`  ${c.name.padEnd(pad)}${c.desc || ''}`);
-  }
-  ctx.print('  help keys'.padEnd(pad + 2) + 'keyboard stuff');
+  printHelpIntro(ctx);
   ctx.print('');
-  ctx.print("there's more. three bodies are still in orbit.");
+
+  const commands = visibleRegistry();
+  for (const category of CATEGORY_ORDER) {
+    const group = commands.filter((c) => (c.category || 'core') === category);
+    if (!group.length) continue;
+    ctx.print(`${CATEGORY_LABELS[category] || category}:`);
+    for (const c of group) {
+      ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
+    }
+    ctx.print('');
+  }
+  const uncategorized = commands.filter((c) => !CATEGORY_ORDER.includes(c.category || 'core'));
+  if (uncategorized.length) {
+    ctx.print('other:');
+    for (const c of uncategorized) ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
+    ctx.print('');
+  }
+}
+
+function printHelpIntro(ctx) {
+  ctx.print('guest command index:');
+  ctx.print('  help <command>  syntax and examples');
+  ctx.print('  man <command>   same details, shorter habit');
+  ctx.print('  help keys       keyboard controls');
+  ctx.print('  tab             complete command names');
+}
+
+function printCommandDetail(ctx, name) {
+  const command = resolveCommandForHelp(name);
+  if (!command) {
+    ctx.print(`no guest manual entry for "${name}". try help.`);
+    return;
+  }
+  const guide = COMMAND_GUIDE[command.name] || {};
+  ctx.print('');
+  ctx.print(commandLabel(command));
+  ctx.print(`  ${commandDescription(command)}`);
+  ctx.print(`  category: ${CATEGORY_LABELS[command.category] || command.category || 'core'}`);
+  if (guide.syntax) ctx.print(`  syntax: ${guide.syntax}`);
+  if (guide.examples?.length) ctx.print(`  example: ${guide.examples.join(' | ')}`);
 }

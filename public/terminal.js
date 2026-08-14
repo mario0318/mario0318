@@ -17,6 +17,7 @@ const MAX_LINES = 500;
 const LIVE_CONFIG_URL = 'https://firestore.googleapis.com/v1/projects/mario0318-terminal-live/databases/(default)/documents/terminal/config';
 const LIVE_CACHE_KEY = 'mario0318-terminal-live-config-v1';
 const LIVE_CACHE_TTL = 5 * 60 * 1000;
+const COMMAND_TIMEOUT_MS = 8000;
 
 let registry = [];
 let byName = new Map();
@@ -266,6 +267,7 @@ function resolve(name, raw) {
 
 function commandAllowed(command, raw) {
   if (command.enabled === false) return false;
+  if (command.category === 'admin') return false;
   const folded = raw.toLowerCase();
   return !(command.blockedPhrases || []).some((phrase) => folded.includes(String(phrase).toLowerCase()));
 }
@@ -281,6 +283,10 @@ function applyLiveConfig(live) {
   }));
   configureResponses(live.responsePools, live.settings);
   return true;
+}
+
+function commandVisibleToGuests(command) {
+  return command && command.enabled !== false && command.category !== 'admin';
 }
 
 function readCachedLiveConfig() {
@@ -315,12 +321,24 @@ async function run(raw) {
     openPanel: (key, data) => mountApplet(key, data, false),
     openInlineApplet: (key) => mountApplet(key, null, true),
     soundcloud,
-    analemmaLive: false,
+    analemmaLive: true,
     history: history.slice(),
   };
 
   const before = el.out.childElementCount;
-  const handled = respond(command, args, ctx);
+  let handled = false;
+  try {
+    handled = await Promise.race([
+      Promise.resolve(respond(command, args, ctx)),
+      new Promise((resolve) => setTimeout(() => {
+        print('command timed out. nothing is still running.');
+        resolve(false);
+      }, COMMAND_TIMEOUT_MS)),
+    ]);
+  } catch {
+    print('command failed cleanly. no state left hanging.');
+    handled = false;
+  }
   const produced = el.out.childElementCount > before;
 
   if (handled) {
@@ -338,7 +356,7 @@ async function run(raw) {
 function complete() {
   const val = el.cmd.value.trim().toLowerCase();
   if (!val) return;
-  const pool = registry.filter((c) => c.listed).map((c) => c.name);
+  const pool = registry.filter(commandVisibleToGuests).map((c) => c.name);
   const hits = pool.filter((n) => n.startsWith(val));
   if (hits.length === 1) el.cmd.value = hits[0] + ' ';
   else if (hits.length > 1) { stagger = 0; print(hits.join('   '), 'dim'); }

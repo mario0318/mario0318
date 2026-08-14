@@ -6,9 +6,13 @@
   "scripts": {
     "start": "node server.js",
     "test": "node test-terminal.mjs",
+    "test:browser": "playwright test tests/terminal.browser.spec.mjs",
     "validate:orbit": "node scripts/validate-orbital-map.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
   }
 }
