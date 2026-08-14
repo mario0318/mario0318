@@ -138,8 +138,11 @@ test('specific repaired commands complete and leave no stuck working state', asy
   await openTerminal(page, { width: 390, height: 844 });
 
   await runCommand(page, 'play');
-  await expect(page.locator('#out')).toContainText(/no tracks configured|ships none/);
+  await expect(page.locator('#panel')).toBeVisible();
+  await expect(page.locator('#panel iframe')).toHaveAttribute('src', /w\.soundcloud\.com\/player/);
   await expect(page.locator('.dots')).not.toHaveClass(/working/, { timeout: 1500 });
+  await runCommand(page, 'close');
+  await expect(page.locator('#panel')).toBeHidden();
 
   await runCommand(page, 'number');
   await expect(page.locator('#out')).toContainText('1 to 100');

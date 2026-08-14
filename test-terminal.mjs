@@ -9,6 +9,7 @@ import { stopGame } from './public/terminal-games.js';
 globalThis.window = globalThis.window || { setTimeout };
 
 const registry = JSON.parse(fs.readFileSync('public/commands.public.json', 'utf8')).commands;
+const bundledTracks = JSON.parse(fs.readFileSync('public/tracks.json', 'utf8'));
 setRegistry(registry);
 
 const results = [];
@@ -62,6 +63,9 @@ check('dollar-safe {title}', t1 === "dealing you: Cost $& Effect $' end", t1);
 
 const t2 = formatLine('{input}: command not found. story of its life.', { input: '$$$ profit $&' });
 check('dollar-safe {input}', t2.startsWith('$$$ profit $&:'), t2);
+
+check('bundled soundcloud track list is populated', bundledTracks.length >= 5);
+check('bundled soundcloud tracks use public mario0318 links', bundledTracks.every((track) => /^https:\/\/soundcloud\.com\/mario0318\//.test(track.url)));
 
 // easter reachability through dispatcher
 let result = await runCommand(null, [], 'whoami');
@@ -147,6 +151,7 @@ const helpText = result.state.printed.join('\n');
 check('help lists every guest-visible registry command', visibleCommands.every((command) => helpText.includes(command.name)));
 check('help does not end with vague extra-command teaser', !helpText.includes("there's more"));
 check('help exposes discovery syntax', /help <command>/.test(helpText) && /tab/.test(helpText));
+check('help does not expose command categories', !/^(core|places|toys|system|utility|cone|games|network|lore|maintenance|data|visual|other):$/m.test(helpText));
 
 // help keys prints verbatim block
 result = await runCommand({ name: 'help', ui: 'text' }, ['keys'], 'help keys');
@@ -155,6 +160,7 @@ check('help keys verbatim', result.state.printed[0] === 'keyboard things:' && re
 // command-specific help
 result = await runCommand({ name: 'help', ui: 'text' }, ['number'], 'help number');
 check('help number includes syntax and example', /syntax: number/.test(result.state.printed.join('\n')) && /number 37/.test(result.state.printed.join('\n')));
+check('help number does not include category', !result.state.printed.join('\n').includes('category:'));
 
 // half-wired registered command falls to unknown (no tells)
 result = await runCommand({ name: 'ghost', ui: 'text' }, [], 'ghost');

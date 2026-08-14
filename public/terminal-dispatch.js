@@ -181,21 +181,6 @@ export function setRegistry(commands) {
   registry = commands;
 }
 
-const CATEGORY_LABELS = {
-  core: 'core',
-  explore: 'places',
-  toys: 'toys',
-  system: 'system',
-  utility: 'utility',
-  cone: 'cone',
-  games: 'games',
-  network: 'network',
-  lore: 'lore',
-  maintenance: 'maintenance',
-  data: 'data',
-  visual: 'visual',
-};
-
 const CATEGORY_ORDER = ['core', 'explore', 'toys', 'system', 'utility', 'cone', 'games', 'network', 'lore', 'maintenance', 'data', 'visual'];
 
 const CATEGORY_DESCRIPTIONS = {
@@ -211,7 +196,7 @@ const CATEGORY_DESCRIPTIONS = {
 };
 
 const DESCRIPTION_OVERRIDES = {
-  play: 'vault player status',
+  play: 'random clip from the vault',
   cone: 'toggle cone lore channel',
   number: 'higher/lower 1-100 game',
 };
@@ -291,18 +276,12 @@ function printHelpList(ctx) {
   for (const category of CATEGORY_ORDER) {
     const group = commands.filter((c) => (c.category || 'core') === category);
     if (!group.length) continue;
-    ctx.print(`${CATEGORY_LABELS[category] || category}:`);
     for (const c of group) {
       ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
     }
-    ctx.print('');
   }
   const uncategorized = commands.filter((c) => !CATEGORY_ORDER.includes(c.category || 'core'));
-  if (uncategorized.length) {
-    ctx.print('other:');
-    for (const c of uncategorized) ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
-    ctx.print('');
-  }
+  for (const c of uncategorized) ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
 }
 
 function printHelpIntro(ctx) {
@@ -323,7 +302,6 @@ function printCommandDetail(ctx, name) {
   ctx.print('');
   ctx.print(commandLabel(command));
   ctx.print(`  ${commandDescription(command)}`);
-  ctx.print(`  category: ${CATEGORY_LABELS[command.category] || command.category || 'core'}`);
   if (guide.syntax) ctx.print(`  syntax: ${guide.syntax}`);
   if (guide.examples?.length) ctx.print(`  example: ${guide.examples.join(' | ')}`);
 }
