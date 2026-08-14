@@ -1,6 +1,7 @@
 # hi👋
 
-i build websites, tools, and interfaces. some of it exists due to forces beyond my control. other stuff simply is because i decided for it to be.
+i build websites, tools, and interfaces. some of it exists due to forces beyond my control. i blame cosmic interference and poor impulse management.
+
 
 **What I'm working on:**
 * <img src="https://mario0318.com/assets/favicon-32.png" width="16" height="16" alt=""> [mario0318.com](https://mario0318.com) my home base terminal.
