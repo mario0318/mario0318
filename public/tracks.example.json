@@ -1,0 +1,13 @@
+[
+  {
+    "title": "example dropbox clip",
+    "url": "https://www.dropbox.com/scl/fi/example/example.mp3?rlkey=example&dl=0",
+    "source": "Dropbox shared link"
+  },
+  {
+    "title": "example direct clip",
+    "url": "https://audio.example.com/clips/example.wav",
+    "type": "audio/wav",
+    "source": "direct file host"
+  }
+]

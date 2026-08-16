@@ -41,8 +41,8 @@ let responsePools = {
       'switching to the catalog. pick your own noise.',
     ],
     empty: [
-      'the vault has no tracks configured yet. command works; catalog is empty.',
-      'play needs a real track list. this repo currently ships none.',
+      'the audio vault has no direct file urls configured yet.',
+      'play needs direct audio urls in tracks.json. no embed player involved.',
     ],
   },
 

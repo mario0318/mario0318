@@ -81,7 +81,7 @@ function openPortal(id, data) {
     : id === 'identity' ? 'mario0318'
     : id === 'projects' ? 'things that got built'
     : id === 'contact' ? 'reach out'
-    : id === 'play-list' ? 'the vault'
+    : id === 'play-list' ? 'audio vault'
     : id;
 
   const body = el.portal.querySelector('#portal-body');
@@ -129,7 +129,7 @@ function openPortal(id, data) {
       b.textContent = t.title;
       b.addEventListener('click', async () => {
         closePortal();
-        await mountApplet('soundcloud', t, false);
+        await mountApplet('audio-vault', t, false);
       });
       body.appendChild(b);
     }
@@ -226,9 +226,9 @@ async function closeAll() {
   el.cmd.focus();
 }
 
-// ---------------------------------------------------------------- soundcloud state
+// ---------------------------------------------------------------- audio vault state
 
-const soundcloud = {
+const audioVault = {
   tracks: null,
   async load() {
     if (this.tracks) return this.tracks;
@@ -314,13 +314,13 @@ async function run(raw) {
 
   setDots('working');
 
-  if (command?.name === 'play') await soundcloud.load();
+  if (command?.name === 'play') await audioVault.load();
 
   const ctx = {
     rawInput: input, print, openPortal, closeAll, clearLog, logHasContent, anyUiOpen, navigate,
     openPanel: (key, data) => mountApplet(key, data, false),
     openInlineApplet: (key) => mountApplet(key, null, true),
-    soundcloud,
+    audioVault,
     analemmaLive: true,
     history: history.slice(),
   };

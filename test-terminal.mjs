@@ -37,7 +37,7 @@ function makeCtx(overrides = {}) {
     logHasContent: () => true,
     anyUiOpen: () => false,
     navigate: (path) => { state.navigated = path; },
-    soundcloud: { tracks: [], pickRandom() { return this.tracks[0]; } },
+    audioVault: { tracks: [], pickRandom() { return this.tracks[0]; } },
     analemmaLive: true,
     history: ['ls', 'status', 'play'],
     ...overrides,
@@ -64,8 +64,8 @@ check('dollar-safe {title}', t1 === "dealing you: Cost $& Effect $' end", t1);
 const t2 = formatLine('{input}: command not found. story of its life.', { input: '$$$ profit $&' });
 check('dollar-safe {input}', t2.startsWith('$$$ profit $&:'), t2);
 
-check('bundled soundcloud track list is populated', bundledTracks.length >= 5);
-check('bundled soundcloud tracks use public mario0318 links', bundledTracks.every((track) => /^https:\/\/soundcloud\.com\/mario0318\//.test(track.url)));
+check('bundled track manifest is an array', Array.isArray(bundledTracks));
+check('bundled track manifest avoids SoundCloud page links', bundledTracks.every((track) => !/soundcloud\.com/i.test(track.url || track.audioUrl || '')));
 
 // easter reachability through dispatcher
 let result = await runCommand(null, [], 'whoami');
@@ -105,7 +105,7 @@ check('safe calculator evaluates arithmetic', result.state.printed[0] === '54', 
 
 // play with empty vault -> intentional empty response, no panel
 result = await runCommand({ name: 'play', ui: 'panel' }, [], 'play');
-check('play empty vault prints intentional useful line', /no tracks configured|ships none/.test(result.state.printed[0] || ''), result.state.printed[0]);
+check('play empty vault prints intentional useful line', /no direct file urls|direct audio urls/.test(result.state.printed[0] || ''), result.state.printed[0]);
 check('play empty vault does NOT open panel', result.state.panels.length === 0);
 
 // play with tracks -> title interpolated, panel opened
@@ -113,10 +113,10 @@ result = await runCommand(
   { name: 'play', ui: 'panel' },
   [],
   'play',
-  { soundcloud: { tracks: [{ title: 'Weird $& Loop', url: 'x' }], pickRandom() { return this.tracks[0]; } } },
+  { audioVault: { tracks: [{ title: 'Weird $& Loop', url: 'https://media.example.test/clip.mp3' }], pickRandom() { return this.tracks[0]; } } },
 );
 check('play interpolates $-safe title', (result.state.printed[0] || '').includes('Weird $& Loop'), result.state.printed[0]);
-check('play opens panel', result.state.panels[0]?.key === 'soundcloud');
+check('play opens audio vault panel', result.state.panels[0]?.key === 'audio-vault');
 
 result = await runCommand({ name: 'analemma', ui: 'panel' }, [], 'analemma');
 check('analemma opens panel', result.state.panels[0]?.key === 'analemma');
@@ -152,6 +152,7 @@ check('help lists every guest-visible registry command', visibleCommands.every((
 check('help does not end with vague extra-command teaser', !helpText.includes("there's more"));
 check('help exposes discovery syntax', /help <command>/.test(helpText) && /tab/.test(helpText));
 check('help does not expose command categories', !/^(core|places|toys|system|utility|cone|games|network|lore|maintenance|data|visual|other):$/m.test(helpText));
+check('help descriptions are not category fallbacks', !/(simulated .* command|browser-local (utility|mini-game|command)|traffic-cone lore\/control command|site lore response|visual terminal output)/.test(helpText));
 
 // help keys prints verbatim block
 result = await runCommand({ name: 'help', ui: 'text' }, ['keys'], 'help keys');
@@ -161,6 +162,9 @@ check('help keys verbatim', result.state.printed[0] === 'keyboard things:' && re
 result = await runCommand({ name: 'help', ui: 'text' }, ['number'], 'help number');
 check('help number includes syntax and example', /syntax: number/.test(result.state.printed.join('\n')) && /number 37/.test(result.state.printed.join('\n')));
 check('help number does not include category', !result.state.printed.join('\n').includes('category:'));
+
+result = await runCommand({ name: 'help', ui: 'text' }, ['play'], 'help play');
+check('help play does not advertise unimplemented next command', !result.state.printed.join('\n').includes('play next'));
 
 // half-wired registered command falls to unknown (no tells)
 result = await runCommand({ name: 'ghost', ui: 'text' }, [], 'ghost');

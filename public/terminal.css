@@ -466,6 +466,39 @@ body.panel-open .term-prompt { padding: 1rem 0; }
 .applet-frame-tall iframe { height: calc(100dvh - 160px); min-height: 28rem; }
 .applet-card a { color: var(--dot-3); text-underline-offset: .2em; }
 
+.audio-card {
+  display: grid;
+  gap: .8rem;
+  max-width: 42rem;
+  padding: 1rem;
+  border: 1px solid var(--surface-hi);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 0 0, rgba(77,216,199,.08), transparent 12rem),
+    var(--bg);
+}
+.audio-card h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.audio-meta,
+.audio-note,
+.audio-links {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-small);
+}
+.audio-player {
+  width: 100%;
+  accent-color: var(--dot-3);
+}
+.audio-links a {
+  color: var(--dot-3);
+  text-underline-offset: .2em;
+}
+
 .lab-row { display: flex; align-items: center; gap: .75rem; margin: .4rem 0; }
 .lab-row label { width: 10ch; color: var(--text-dim); font-size: var(--fs-small); }
 .lab-row input[type="range"] { flex: 1; accent-color: var(--dot-3); }

@@ -16,7 +16,7 @@
 //       logHasContent() : boolean
 //       anyUiOpen()     : boolean
 //       navigate(path)  : move to another first-party interface
-//       soundcloud      : { tracks: []|null, pickRandom(): {title, url} }
+//       audioVault      : { tracks: []|null, pickRandom(): {title, url|audioUrl} }
 //       analemmaLive    : boolean (studio web-hosted yet?)
 //
 // Invariants (do not relax):
@@ -95,24 +95,24 @@ export async function respond(command, args, ctx) {
 
     case 'play': {
       if (args[0] === 'list') {
-        const sc = ctx.soundcloud;
-        if (!sc || !sc.tracks || sc.tracks.length === 0) {
+        const vault = ctx.audioVault;
+        if (!vault || !vault.tracks || vault.tracks.length === 0) {
           say(ctx, 'play', 'empty');
           return true;
         }
         say(ctx, 'play', 'list');
-        ctx.openPortal('play-list', sc.tracks);
+        ctx.openPortal('play-list', vault.tracks);
         return true;
       }
-      const sc = ctx.soundcloud;
-      if (!sc || !sc.tracks || sc.tracks.length === 0) {
+      const vault = ctx.audioVault;
+      if (!vault || !vault.tracks || vault.tracks.length === 0) {
         say(ctx, 'play', 'empty');
         return true;
       }
-      const track = sc.pickRandom();
+      const track = vault.pickRandom();
       const line = formatLine(pickLine('play'), { title: track.title });
       if (line) ctx.print(line);
-      await ctx.openPanel('soundcloud', track);
+      await ctx.openPanel('audio-vault', track);
       return true;
     }
 
@@ -181,30 +181,117 @@ export function setRegistry(commands) {
   registry = commands;
 }
 
-const CATEGORY_ORDER = ['core', 'explore', 'toys', 'system', 'utility', 'cone', 'games', 'network', 'lore', 'maintenance', 'data', 'visual'];
-
-const CATEGORY_DESCRIPTIONS = {
-  system: 'simulated shell/system command',
-  utility: 'browser-local utility',
-  cone: 'traffic-cone lore/control command',
-  games: 'browser-local mini-game',
-  network: 'simulated network command',
-  lore: 'site lore response',
-  maintenance: 'simulated maintenance command',
-  data: 'simulated data command',
-  visual: 'visual terminal output',
-};
-
 const DESCRIPTION_OVERRIDES = {
-  play: 'random clip from the vault',
-  cone: 'toggle cone lore channel',
-  number: 'higher/lower 1-100 game',
+  help: 'show the command index',
+  projects: 'open shipped work',
+  play: 'play a vault audio clip',
+  analemma: 'open Analemma Studio',
+  dots: 'open dot controls',
+  contact: 'show contact options',
+  clear: 'clear terminal output',
+  close: 'close panels and portals',
+  man: 'show command details',
+  ls: 'list terminal files',
+  cat: 'read a terminal file',
+  cd: 'change the pretend path',
+  history: 'show recent input',
+  top: 'show process load',
+  env: 'show guest environment',
+  sysinfo: 'show terminal system info',
+  dmesg: 'show boot-style messages',
+  find: 'search terminal files',
+  which: 'locate a command name',
+  alias: 'show shortcut examples',
+  jobs: 'show foreground job state',
+  uptime: 'show tab uptime',
+  hostname: 'show terminal host name',
+  lscpu: 'show dot-core profile',
+  neofetch: 'print terminal profile',
+  date: 'show local date',
+  grep: 'search command history',
+  echo: 'repeat text',
+  calc: 'evaluate safe arithmetic',
+  timer: 'start a local timer',
+  wc: 'count a terminal file',
+  head: 'read first line of a file',
+  tail: 'read last line of a file',
+  cone: 'toggle cone signal',
+  glare: 'reflect cone light',
+  watch: 'read cone watch log',
+  alert: 'test a harmless alert',
+  status: 'show cone health',
+  sort: 'draw a role',
+  traffic: 'read traffic advisory',
+  patch: 'run a fictional patch report',
+  idle: 'toggle low-energy watch',
+  report: 'record an observation',
+  tilt: 'adjust cone posture',
+  reflect: 'return light',
+  taped: 'inspect the taped cone shell',
+  'cone-id': 'print cone identifier',
+  rps: 'play rock paper scissors',
+  number: 'play higher/lower from 1 to 100',
+  tictactoe: 'play tic-tac-toe',
+  hangman: 'guess the hidden word',
+  snake: 'play turn-based snake',
+  dungeon: 'explore a tiny dungeon',
+  wordle: 'guess a five-letter word',
+  memory: 'repeat a growing sequence',
+  quiz: 'answer terminal trivia',
+  clicker: 'increment the signal count',
+  pong: 'play turn-based pong',
+  tetris: 'drop text blocks',
+  maze: 'navigate a tiny maze',
+  mastermind: 'crack a four-digit code',
+  sudoku: 'solve a tiny sudoku row',
+  ping: 'check fake latency',
+  traceroute: 'trace a fake route',
+  nslookup: 'look up a pretend host',
+  netstat: 'show pretend connections',
+  arp: 'show a pretend neighbor',
+  dig: 'query a pretend record',
+  ifconfig: 'show a pretend interface',
+  route: 'show pretend routes',
+  ssh: 'refuse remote shell access',
+  telnet: 'refuse old remote access',
+  ftp: 'refuse file-transfer access',
+  curl: 'refuse web fetch access',
+  wget: 'refuse web download access',
+  secret: 'print a terminal secret',
+  log: 'show watch entries',
+  debug: 'show diagnostic state',
+  ver: 'show terminal version',
+  who: 'show terminal identities',
+  about: 'show site identity',
+  fortune: 'print a short fortune',
+  coffee: 'request coffee badly',
+  du: 'show pretend file sizes',
+  df: 'show pretend storage',
+  ps: 'show pretend processes',
+  kill: 'refuse process removal',
+  mount: 'show pretend mounts',
+  umount: 'refuse unmounting',
+  free: 'show pretend memory',
+  vmstat: 'show pretend memory stats',
+  w: 'show visitor session',
+  mkdir: 'create a temporary folder',
+  touch: 'touch a temporary file',
+  rm: 'withhold deletion',
+  mv: 'pretend to move a file',
+  cp: 'pretend to copy a file',
+  chmod: 'apply cosmetic permissions',
+  temp: 'show temporary storage',
+  backup: 'run a pretend backup',
+  config: 'show terminal settings',
+  cmatrix: 'print matrix-style text',
+  ascii_art: 'print cone ASCII art',
+  banner: 'print the site banner',
 };
 
 const COMMAND_GUIDE = {
   help: { syntax: 'help [command] | help keys', examples: ['help number', 'help keys'] },
   projects: { syntax: 'projects', examples: ['projects'] },
-  play: { syntax: 'play | play list | play next', examples: ['play', 'play list'] },
+  play: { syntax: 'play | play list', examples: ['play', 'play list'] },
   analemma: { syntax: 'analemma', examples: ['analemma'] },
   dots: { syntax: 'dots', examples: ['dots'] },
   contact: { syntax: 'contact', examples: ['contact'] },
@@ -259,7 +346,7 @@ function commandLabel(command) {
 
 function commandDescription(command) {
   if (DESCRIPTION_OVERRIDES[command.name]) return DESCRIPTION_OVERRIDES[command.name];
-  return command.desc || CATEGORY_DESCRIPTIONS[command.category] || 'browser-local command';
+  return command.desc || 'available guest command';
 }
 
 function resolveCommandForHelp(name) {
@@ -272,16 +359,7 @@ function printHelpList(ctx) {
   printHelpIntro(ctx);
   ctx.print('');
 
-  const commands = visibleRegistry();
-  for (const category of CATEGORY_ORDER) {
-    const group = commands.filter((c) => (c.category || 'core') === category);
-    if (!group.length) continue;
-    for (const c of group) {
-      ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
-    }
-  }
-  const uncategorized = commands.filter((c) => !CATEGORY_ORDER.includes(c.category || 'core'));
-  for (const c of uncategorized) ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
+  for (const c of visibleRegistry()) ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
 }
 
 function printHelpIntro(ctx) {
