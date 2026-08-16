@@ -7,6 +7,8 @@
     "start": "node server.js",
     "test": "node test-terminal.mjs",
     "test:browser": "playwright test tests/terminal.browser.spec.mjs",
+    "import:audio-vault": "node scripts/import-audio-vault.mjs",
+    "sync:audio-vault": "powershell -ExecutionPolicy Bypass -File scripts/sync-audio-vault-gcs.ps1",
     "validate:orbit": "node scripts/validate-orbital-map.js"
   },
   "engines": {

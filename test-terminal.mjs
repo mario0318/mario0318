@@ -5,6 +5,7 @@ import { respond, setRegistry } from './public/terminal-dispatch.js';
 import { respondUtility } from './public/terminal-utilities.js';
 import { classifyAssistant, ASSISTANT_BUCKETS } from './public/terminal-assistant-rules.js';
 import { stopGame } from './public/terminal-games.js';
+import { displayTitle, isExcludedByPrivacy, normalizeUrlPrefix, outputName } from './scripts/import-audio-vault.mjs';
 
 globalThis.window = globalThis.window || { setTimeout };
 
@@ -66,6 +67,13 @@ check('dollar-safe {input}', t2.startsWith('$$$ profit $&:'), t2);
 
 check('bundled track manifest is an array', Array.isArray(bundledTracks));
 check('bundled track manifest avoids SoundCloud page links', bundledTracks.every((track) => !/soundcloud\.com/i.test(track.url || track.audioUrl || '')));
+check('audio vault cache is ignored by git', fs.readFileSync('.gitignore', 'utf8').includes('public/audio-vault/'));
+check('audio vault cache is ignored by Cloud Run source deploy', fs.readFileSync('.gcloudignore', 'utf8').includes('public/audio-vault/'));
+check('audio importer excludes Personal path segment', isExcludedByPrivacy('Personal/clip.mp3') && isExcludedByPrivacy('foo/personal/bar.wav'));
+check('audio importer does not exclude non-personal words', !isExcludedByPrivacy('impersonal/clip.mp3') && !isExcludedByPrivacy('personality/clip.mp3'));
+check('audio importer creates mp3 output names', outputName('Folder/Clip With $ Weird.wav').endsWith('.mp3'));
+check('audio importer title preserves folder context', displayTitle('Folder/Clip_Name.wav') === 'Folder / Clip Name');
+check('audio importer normalizes url prefix', normalizeUrlPrefix('https://media.example.test/audio-vault') === 'https://media.example.test/audio-vault/');
 
 // easter reachability through dispatcher
 let result = await runCommand(null, [], 'whoami');

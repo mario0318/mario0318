@@ -6,3 +6,4 @@ admin/
 firebase.json
 firestore.rules
 firebase-debug.log
+public/audio-vault/
