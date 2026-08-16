@@ -87,6 +87,8 @@ check('bundled track manifest avoids SoundCloud page links', bundledTracks.every
 check('terminal palette keeps body text high contrast', contrastRatio(cssHexVar('text'), cssHexVar('bg')) >= 7);
 check('terminal palette keeps dim text readable', contrastRatio(cssHexVar('text-dim'), cssHexVar('bg')) >= 4.5);
 check('terminal palette keeps accents readable on black', ['dot-1', 'dot-2', 'dot-3'].every((name) => contrastRatio(cssHexVar(name), cssHexVar('bg')) >= 4.5));
+check('terminal palette keeps command and interactive input readable', ['command', 'interactive'].every((name) => contrastRatio(cssHexVar(name), cssHexVar('bg')) >= 4.5));
+check('terminal font stack is technical sans, not fully monospace', /sans-serif/.test(terminalCss) && /tabular-nums/.test(terminalCss) && !/ui-monospace/.test(terminalCss));
 check('audio vault cache is ignored by git', fs.readFileSync('.gitignore', 'utf8').includes('public/audio-vault/'));
 check('audio vault cache is ignored by Cloud Run source deploy', fs.readFileSync('.gcloudignore', 'utf8').includes('public/audio-vault/'));
 check('audio importer excludes Personal path segment', isExcludedByPrivacy('Personal/clip.mp3') && isExcludedByPrivacy('foo/personal/bar.wav'));

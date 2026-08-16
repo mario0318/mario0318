@@ -144,6 +144,27 @@ test('long terminal output scrolls only inside the terminal output area', async 
   await expectNoDocumentOverflow(page);
 });
 
+test('command input highlights commands and interactive aliases', async ({ page }) => {
+  await openTerminal(page, { width: 390, height: 844 });
+
+  await page.locator('#cmd').fill('pl');
+  await expect(page.locator('#cmd')).toHaveAttribute('data-token-state', 'default');
+
+  await page.locator('#cmd').fill('play');
+  await expect(page.locator('#cmd')).toHaveAttribute('data-token-state', 'command');
+  await expect(page.locator('#cmd')).toHaveClass(/cmd-token-command/);
+
+  await page.locator('#cmd').fill('music');
+  await expect(page.locator('#cmd')).toHaveAttribute('data-token-state', 'interactive');
+  await expect(page.locator('#cmd')).toHaveClass(/cmd-token-interactive/);
+
+  await page.locator('#cmd').fill('studio');
+  await expect(page.locator('#cmd')).toHaveAttribute('data-token-state', 'interactive');
+
+  await page.locator('#cmd').fill('unmapped');
+  await expect(page.locator('#cmd')).toHaveAttribute('data-token-state', 'default');
+});
+
 test('specific repaired commands complete and leave no stuck working state', async ({ page }) => {
   await openTerminal(page, { width: 390, height: 844 });
 

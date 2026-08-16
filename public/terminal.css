@@ -19,6 +19,8 @@
   --dot-1:       #eb5968;
   --dot-2:       #e6c76a;
   --dot-3:       #72c9d0;
+  --command:     #39ff14;
+  --interactive: #d46a1c;
 
   /* mario0318 logo mark colors — used by the header brand dots */
   --brand-blue:  #2183e6;
@@ -35,7 +37,8 @@
   --t-slow: 420ms;
   --ease:   cubic-bezier(.2,.9,.2,1);
 
-  --mono: "Cascadia Mono", "Cascadia Code", "JetBrains Mono", "Fira Code", "IBM Plex Mono", "SFMono-Regular", "SF Mono", "Roboto Mono", "Source Code Pro", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", ui-monospace, monospace;
+  /* Technical sans stack with tabular/mono-style features, not full monospace. */
+  --mono: "Aptos", "Segoe UI Variable Text", "Segoe UI", "Inter", "IBM Plex Sans", "Roboto", "Helvetica Neue", Arial, system-ui, sans-serif;
   --fs-body: clamp(14px, 1.6vw, 16px);
   --fs-small: 12px;
   --lh: 1.42;
@@ -65,7 +68,8 @@ html, body {
   font-size: var(--fs-body);
   line-height: var(--lh);
   font-variant-ligatures: contextual common-ligatures;
-  font-feature-settings: "liga" 1, "calt" 1, "zero" 1;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: "liga" 1, "calt" 1, "tnum" 1, "zero" 1;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
 }
@@ -233,6 +237,13 @@ body {
 }
 .line.dim { color: var(--text-dim); }
 .line.echo { color: var(--text-dim); }
+.line.echo-command {
+  color: var(--command);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--command) 42%, transparent);
+}
+.line.echo-interactive {
+  color: var(--interactive);
+}
 .line.echo::before {
   content: "›";
   position: absolute;
@@ -283,12 +294,21 @@ body {
   border: none;
   color: var(--text);
   font: inherit;
-  font-weight: 600;
+  font-weight: 540;
   padding: 0;
   caret-color: var(--dot-3);
+  transition: color var(--t-fast) var(--ease), text-shadow var(--t-fast) var(--ease);
 }
 #cmd:focus { outline: none; }
 #cmd::placeholder { color: var(--text-ghost); }
+#cmd.cmd-token-command {
+  color: var(--command);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--command) 40%, transparent);
+}
+#cmd.cmd-token-interactive {
+  color: var(--interactive);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--interactive) 28%, transparent);
+}
 
 /* ---------- the three dots (spec §2) ---------- */
 

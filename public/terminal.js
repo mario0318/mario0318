@@ -26,6 +26,13 @@ let histIdx = -1;
 let openApplet = null;
 let dotTimer = null;
 
+const INTERACTIVE_TERMS = new Set([
+  'stop', 'quit', 'exit', 'look', 'inventory', 'inv',
+  'north', 'south', 'east', 'west', 'n', 's', 'e', 'w',
+  'up', 'down', 'stay', 'rock', 'paper', 'scissors',
+  'yes', 'no', 'a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3',
+]);
+
 // ---------------------------------------------------------------- dots (§2)
 
 function setDots(state) {
@@ -58,6 +65,36 @@ function clearLog() {
   el.out.replaceChildren();
 }
 function logHasContent() { return el.out.childElementCount > 0; }
+
+function commandNames() {
+  return new Set(registry.filter(commandVisibleToGuests).map((command) => command.name));
+}
+
+function interactiveTerms() {
+  const terms = new Set(INTERACTIVE_TERMS);
+  for (const command of registry.filter(commandVisibleToGuests)) {
+    for (const alias of command.aliases || []) terms.add(String(alias).toLowerCase());
+    for (const trigger of command.triggers || []) {
+      if (trigger.type === 'exact' && trigger.value) terms.add(String(trigger.value).toLowerCase());
+    }
+  }
+  return terms;
+}
+
+function inputTokenState(raw) {
+  const first = raw.trimStart().split(/\s+/)[0]?.toLowerCase() || '';
+  if (!first) return 'default';
+  if (commandNames().has(first)) return 'command';
+  if (interactiveTerms().has(first)) return 'interactive';
+  return 'default';
+}
+
+function updateInputTone() {
+  const state = inputTokenState(el.cmd?.value || '');
+  el.cmd.classList.toggle('cmd-token-command', state === 'command');
+  el.cmd.classList.toggle('cmd-token-interactive', state === 'interactive');
+  el.cmd.dataset.tokenState = state;
+}
 
 // ---------------------------------------------------------------- portal (§3)
 
@@ -303,7 +340,8 @@ async function run(raw) {
   if (!input) return;
 
   stagger = 0;
-  print('~ ' + input, 'echo');
+  const inputState = inputTokenState(input);
+  print('~ ' + input, `echo${inputState === 'command' ? ' echo-command' : inputState === 'interactive' ? ' echo-interactive' : ''}`);
   stagger = 0;
   history.unshift(input);
   histIdx = -1;
@@ -359,7 +397,10 @@ function complete() {
   if (!val) return;
   const pool = registry.filter(commandVisibleToGuests).map((c) => c.name);
   const hits = pool.filter((n) => n.startsWith(val));
-  if (hits.length === 1) el.cmd.value = hits[0] + ' ';
+  if (hits.length === 1) {
+    el.cmd.value = hits[0] + ' ';
+    updateInputTone();
+  }
   else if (hits.length > 1) { stagger = 0; print(hits.join('   '), 'dim'); }
 }
 
@@ -427,11 +468,13 @@ async function boot() {
     e.preventDefault();
     const v = el.cmd.value;
     el.cmd.value = '';
+    updateInputTone();
     run(v);
   });
 
   el.cmd.addEventListener('input', () => {
     setDots(el.cmd.value ? 'listening' : 'idle');
+    updateInputTone();
   });
 
   el.cmd.addEventListener('keydown', (e) => {
@@ -439,9 +482,11 @@ async function boot() {
     else if (e.key === 'ArrowUp') {
       e.preventDefault();
       if (histIdx < history.length - 1) el.cmd.value = history[++histIdx];
+      updateInputTone();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       el.cmd.value = histIdx > 0 ? history[--histIdx] : (histIdx = -1, '');
+      updateInputTone();
     } else if (e.key === 'Escape') {
       if (anyUiOpen()) closeAll(); else el.cmd.blur();
     }
