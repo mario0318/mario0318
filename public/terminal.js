@@ -178,6 +178,7 @@ async function mountApplet(key, data, inline) {
 
   const ctx = {
     args: [], print, close: closeAll,
+    audioVault,
     tokens: getComputedStyle(document.documentElement),
   };
 

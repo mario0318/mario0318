@@ -484,7 +484,6 @@ body.panel-open .term-prompt { padding: 1rem 0; }
   font-weight: 600;
 }
 .audio-meta,
-.audio-note,
 .audio-links {
   margin: 0;
   color: var(--text-dim);
@@ -493,6 +492,23 @@ body.panel-open .term-prompt { padding: 1rem 0; }
 .audio-player {
   width: 100%;
   accent-color: var(--dot-3);
+}
+.audio-actions {
+  display: flex;
+  gap: .5rem;
+}
+.audio-randomizer {
+  background: var(--surface-hi);
+  color: var(--text);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font: inherit;
+  font-size: var(--fs-small);
+  padding: .35rem .8rem;
+  cursor: pointer;
+}
+.audio-randomizer:hover {
+  border-color: var(--dot-3);
 }
 .audio-links a {
   color: var(--dot-3);

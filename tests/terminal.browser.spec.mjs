@@ -52,6 +52,7 @@ async function openTerminal(page, viewport) {
       contentType: 'application/json',
       body: JSON.stringify([
         { title: 'Browser Test Clip', url: 'https://media.example.test/browser-test.mp3', type: 'audio/mpeg' },
+        { title: 'Browser Test Alt', url: 'https://media.example.test/browser-alt.mp3', type: 'audio/mpeg' },
       ]),
     }),
   );
@@ -148,7 +149,13 @@ test('specific repaired commands complete and leave no stuck working state', asy
 
   await runCommand(page, 'play');
   await expect(page.locator('#panel')).toBeVisible();
-  await expect(page.locator('#panel audio.audio-player')).toHaveAttribute('src', /media\.example\.test\/browser-test\.mp3/);
+  await expect(page.locator('#panel audio.audio-player')).toHaveAttribute('src', /media\.example\.test\/browser-(test|alt)\.mp3/);
+  await expect(page.locator('#panel')).not.toContainText('Dropbox');
+  await expect(page.locator('#panel')).not.toContainText('SoundCloud');
+  await expect(page.getByRole('button', { name: 'randomizer' })).toBeVisible();
+  const firstTrack = await page.locator('#panel audio.audio-player').getAttribute('src');
+  await page.getByRole('button', { name: 'randomizer' }).click();
+  await expect.poll(async () => page.locator('#panel audio.audio-player').getAttribute('src')).not.toBe(firstTrack);
   await expect(page.locator('.dots')).not.toHaveClass(/working/, { timeout: 1500 });
   await runCommand(page, 'close');
   await expect(page.locator('#panel')).toBeHidden();
