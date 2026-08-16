@@ -3,19 +3,22 @@
    Animate transform/opacity/clip-path only. No other saturated hues than --dot-*. */
 
 :root {
-  --bg:          #0a0b0d;
+  /* Averaged from Dracula, Gruvbox Dark, Nord, One Dark, Monokai,
+     Tokyo Night, Catppuccin Mocha, and Solarized Dark, then pulled
+     toward black for stronger terminal contrast. */
+  --bg:          #0a0c0f;
   --bg-pattern:  rgba(255,255,255,0.03);
-  --surface:     #111318;
-  --surface-hi:  #181b22;
-  --rule:        #252a32;
+  --surface:     #111519;
+  --surface-hi:  #161b21;
+  --rule:        #2d3137;
 
-  --text:        #e8e4dc;
-  --text-dim:    #8a8f98;
-  --text-ghost:  #4a4f58;
+  --text:        #ced2d8;
+  --text-dim:    #747a88;
+  --text-ghost:  #3f434c;
 
-  --dot-1:       #ff5c47;
-  --dot-2:       #ffc14d;
-  --dot-3:       #4dd8c7;
+  --dot-1:       #eb5968;
+  --dot-2:       #e6c76a;
+  --dot-3:       #72c9d0;
 
   /* mario0318 logo mark colors — used by the header brand dots */
   --brand-blue:  #2183e6;
@@ -32,7 +35,7 @@
   --t-slow: 420ms;
   --ease:   cubic-bezier(.2,.9,.2,1);
 
-  --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --mono: "Cascadia Mono", "Cascadia Code", "JetBrains Mono", "Fira Code", "IBM Plex Mono", "SFMono-Regular", "SF Mono", "Roboto Mono", "Source Code Pro", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", ui-monospace, monospace;
   --fs-body: clamp(14px, 1.6vw, 16px);
   --fs-small: 12px;
   --lh: 1.42;
@@ -61,7 +64,10 @@ html, body {
   font-family: var(--mono);
   font-size: var(--fs-body);
   line-height: var(--lh);
+  font-variant-ligatures: contextual common-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1, "zero" 1;
   -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 body {
@@ -360,8 +366,8 @@ body {
 .portal {
   position: relative;
   background:
-    radial-gradient(circle at 0 0, rgba(117,225,202,.09), transparent 14rem),
-    linear-gradient(145deg, #151b20, var(--surface) 48%, #0f1317);
+    radial-gradient(circle at 0 0, color-mix(in srgb, var(--dot-3) 9%, transparent), transparent 14rem),
+    linear-gradient(145deg, #181e25, var(--surface) 48%, #0e1215);
   color: var(--text);
   border: 1px solid color-mix(in srgb, var(--dot-3) 30%, var(--surface-hi));
   border-radius: 18px;
@@ -399,7 +405,7 @@ body {
   text-decoration: none;
   transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
 }
-.p-item:hover, .p-item:focus-visible { background: rgba(117,225,202,.08); border-color: rgba(117,225,202,.22); text-decoration: none; transform: translateX(3px); }
+.p-item:hover, .p-item:focus-visible { background: color-mix(in srgb, var(--dot-3) 8%, transparent); border-color: color-mix(in srgb, var(--dot-3) 22%, transparent); text-decoration: none; transform: translateX(3px); }
 .p-item small { display: block; margin-top: .16rem; color: var(--text-dim); font-size: var(--fs-small); }
 .p-link { position: relative; padding-right: 2rem; }
 .p-link::after { content: "↗"; position: absolute; top: .58rem; right: .85rem; color: var(--text-ghost); }
@@ -474,7 +480,7 @@ body.panel-open .term-prompt { padding: 1rem 0; }
   border: 1px solid var(--surface-hi);
   border-radius: 12px;
   background:
-    radial-gradient(circle at 0 0, rgba(77,216,199,.08), transparent 12rem),
+    radial-gradient(circle at 0 0, color-mix(in srgb, var(--dot-3) 8%, transparent), transparent 12rem),
     var(--bg);
 }
 .audio-card h3 {

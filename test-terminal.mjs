@@ -11,6 +11,7 @@ globalThis.window = globalThis.window || { setTimeout };
 
 const registry = JSON.parse(fs.readFileSync('public/commands.public.json', 'utf8')).commands;
 const bundledTracks = JSON.parse(fs.readFileSync('public/tracks.json', 'utf8'));
+const terminalCss = fs.readFileSync('public/terminal.css', 'utf8');
 setRegistry(registry);
 
 const results = [];
@@ -46,6 +47,22 @@ function makeCtx(overrides = {}) {
   return { ctx, state };
 }
 
+function cssHexVar(name) {
+  return terminalCss.match(new RegExp(`--${name}:\\s*(#[0-9a-fA-F]{6})`))?.[1];
+}
+
+function contrastRatio(foreground, background) {
+  const toRgb = (hex) => hex.slice(1).match(/../g).map((part) => parseInt(part, 16) / 255);
+  const channel = (value) => value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  const luminance = (hex) => {
+    const [r, g, b] = toRgb(hex).map(channel);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const lighter = Math.max(luminance(foreground), luminance(background));
+  const darker = Math.min(luminance(foreground), luminance(background));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 async function runCommand(command, args = [], rawInput = null, overrides = {}) {
   const { ctx, state } = makeCtx(overrides);
   ctx.rawInput = rawInput ?? [command?.name, ...args].filter(Boolean).join(' ');
@@ -67,6 +84,9 @@ check('dollar-safe {input}', t2.startsWith('$$$ profit $&:'), t2);
 
 check('bundled track manifest is an array', Array.isArray(bundledTracks));
 check('bundled track manifest avoids SoundCloud page links', bundledTracks.every((track) => !/soundcloud\.com/i.test(track.url || track.audioUrl || '')));
+check('terminal palette keeps body text high contrast', contrastRatio(cssHexVar('text'), cssHexVar('bg')) >= 7);
+check('terminal palette keeps dim text readable', contrastRatio(cssHexVar('text-dim'), cssHexVar('bg')) >= 4.5);
+check('terminal palette keeps accents readable on black', ['dot-1', 'dot-2', 'dot-3'].every((name) => contrastRatio(cssHexVar(name), cssHexVar('bg')) >= 4.5));
 check('audio vault cache is ignored by git', fs.readFileSync('.gitignore', 'utf8').includes('public/audio-vault/'));
 check('audio vault cache is ignored by Cloud Run source deploy', fs.readFileSync('.gcloudignore', 'utf8').includes('public/audio-vault/'));
 check('audio importer excludes Personal path segment', isExcludedByPrivacy('Personal/clip.mp3') && isExcludedByPrivacy('foo/personal/bar.wav'));
