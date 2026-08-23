@@ -443,7 +443,15 @@ async function boot() {
   setRegistry(registry);
 
   $('fallback-nav').hidden = true;
+  el.term.classList.add('boot-reveal');
   el.term.hidden = false;
+  requestAnimationFrame(() => {
+    document.body.classList.add('terminal-ready');
+    window.setTimeout(() => {
+      document.body.classList.remove('terminal-booting', 'terminal-ready');
+      el.term.classList.remove('boot-reveal');
+    }, 700);
+  });
   setDots('idle');
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -52,6 +52,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   :root { --t-fast: 0ms; --t-med: 0ms; --t-slow: 0ms; }
+  body.terminal-booting::before,
+  .term.boot-reveal {
+    animation: none;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -84,6 +88,24 @@ body {
   overscroll-behavior: none;
 }
 
+body.terminal-booting::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(114,201,208,.13), transparent 0 12%, rgba(10,12,15,.92) 44%, var(--bg) 100%),
+    linear-gradient(180deg, transparent, rgba(255,255,255,.035) 50%, transparent);
+  background-size: auto, 100% 14px;
+  animation: boot-scan 900ms var(--ease) infinite alternate;
+}
+
+body.terminal-ready::before {
+  opacity: 0;
+  animation: boot-fade var(--t-slow) var(--ease) both;
+}
+
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
@@ -92,8 +114,8 @@ body {
 /* ---------- fallback nav (no-JS) ---------- */
 
 #fallback-nav {
+  display: none;
   padding: 2rem;
-  display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
 }
@@ -121,6 +143,9 @@ body {
   box-shadow: 0 24px 70px rgba(0,0,0,.38), 0 2px 0 rgba(255,255,255,.025) inset;
 }
 .term[hidden] { display: none; }
+.term.boot-reveal {
+  animation: term-boot-reveal 620ms var(--ease) both;
+}
 
 .term-head {
   min-height: 46px;
@@ -258,6 +283,31 @@ body {
 @keyframes line-in {
   from { clip-path: inset(0 100% 0 0); transform: translateY(4px); }
   to   { clip-path: inset(0 0 0 0);   transform: none; }
+}
+@keyframes boot-scan {
+  from { opacity: .72; transform: scale(1); }
+  to   { opacity: .95; transform: scale(1.018); }
+}
+@keyframes boot-fade {
+  to { opacity: 0; visibility: hidden; }
+}
+@keyframes term-boot-reveal {
+  from {
+    opacity: 0;
+    clip-path: inset(49% 0 49% 0);
+    filter: saturate(.85) brightness(.78);
+    transform: scale(.996);
+  }
+  42% {
+    opacity: 1;
+    clip-path: inset(48% 0 48% 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    filter: none;
+    transform: none;
+  }
 }
 @keyframes shiver {
   0%,100% { transform: translateX(0); }

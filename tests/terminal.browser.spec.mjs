@@ -99,6 +99,29 @@ async function expectNoDocumentOverflow(page) {
   expect(metrics.termBottom, JSON.stringify(metrics)).toBeLessThanOrEqual(metrics.viewportHeight + 1);
 }
 
+test('fallback project links do not flash before terminal boot', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/terminal.js', () => {});
+  await page.goto(BASE_URL, { waitUntil: 'commit' });
+  await page.waitForSelector('#fallback-nav', { state: 'attached' });
+
+  const preBoot = await page.evaluate(() => {
+    const nav = document.getElementById('fallback-nav');
+    const term = document.getElementById('term');
+    return {
+      navDisplay: getComputedStyle(nav).display,
+      navVisible: nav.getBoundingClientRect().width > 0 && nav.getBoundingClientRect().height > 0,
+      termHidden: term.hidden,
+      booting: document.body.classList.contains('terminal-booting'),
+    };
+  });
+
+  expect(preBoot.navDisplay).toBe('none');
+  expect(preBoot.navVisible).toBe(false);
+  expect(preBoot.termHidden).toBe(true);
+  expect(preBoot.booting).toBe(true);
+});
+
 test('document has no page-level overflow across representative viewports', async ({ page }) => {
   for (const viewport of [
     { width: 1440, height: 900 },
