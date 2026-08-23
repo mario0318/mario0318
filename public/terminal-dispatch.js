@@ -7,7 +7,7 @@
 //     args    : string[] — tokens after the command name
 //     ctx     : host-provided capability object:
 //       rawInput        : the exact trimmed line the user typed
-//       print(text)     : append one line to #out via textContent
+//       print(text, cls?): append one line to #out via textContent
 //       openPortal(id)  : open <dialog> portal with named content
 //       openPanel(key, data?) : lazy-load applet module, mount in panel host
 //       openInlineApplet(key) : mount inline applet under current line
@@ -65,25 +65,34 @@ export async function respond(command, args, ctx) {
     return false;
   }
 
+  const helpFlag = extractHelpFlag(args);
+  if (helpFlag && command.name !== 'help' && command.name !== 'man') {
+    printCommandDetail(ctx, command.name);
+    return true;
+  }
+
   switch (command.name) {
     case 'help': {
       if (args[0] === 'keys') {
-        for (const l of helpKeysLines()) ctx.print(l);
+        for (const l of helpKeysLines()) printHelp(ctx, l);
+        return true;
+      }
+      if (helpFlag) {
+        printCommandDetail(ctx, 'help');
         return true;
       }
       if (args[0]) {
         printCommandDetail(ctx, args[0]);
         return true;
       }
-      const line = pickLine('help');
-      if (line) ctx.print(line);
       printHelpList(ctx);
       return true;
     }
 
     case 'man': {
-      if (args[0]) printCommandDetail(ctx, args[0]);
-      else printHelpIntro(ctx);
+      if (helpFlag) printCommandDetail(ctx, 'man');
+      else if (args[0]) printCommandDetail(ctx, args[0]);
+      else printHelpList(ctx);
       return true;
     }
 
@@ -349,37 +358,36 @@ function commandDescription(command) {
   return command.desc || 'available guest command';
 }
 
+function extractHelpFlag(args) {
+  return args.find((arg) => ['-h', '--help', '-help', '/?'].includes(String(arg || '').toLowerCase()));
+}
+
 function resolveCommandForHelp(name) {
   const needle = String(name || '').toLowerCase();
   return visibleRegistry().find((command) => command.name === needle || (command.aliases || []).includes(needle));
 }
 
 function printHelpList(ctx) {
-  ctx.print('');
-  printHelpIntro(ctx);
-  ctx.print('');
+  printHelp(ctx, '');
+  printHelp(ctx, 'commands:');
 
-  for (const c of visibleRegistry()) ctx.print(`  ${commandLabel(c)}: ${commandDescription(c)}`);
-}
-
-function printHelpIntro(ctx) {
-  ctx.print('guest command index:');
-  ctx.print('  help <command>  syntax and examples');
-  ctx.print('  man <command>   same details, shorter habit');
-  ctx.print('  help keys       keyboard controls');
-  ctx.print('  tab             complete command names');
+  for (const c of visibleRegistry()) printHelp(ctx, `  ${commandLabel(c)}`);
 }
 
 function printCommandDetail(ctx, name) {
   const command = resolveCommandForHelp(name);
   if (!command) {
-    ctx.print(`no guest manual entry for "${name}". try help.`);
+    printHelp(ctx, `no guest manual entry for "${name}". try help.`);
     return;
   }
   const guide = COMMAND_GUIDE[command.name] || {};
-  ctx.print('');
-  ctx.print(commandLabel(command));
-  ctx.print(`  ${commandDescription(command)}`);
-  if (guide.syntax) ctx.print(`  syntax: ${guide.syntax}`);
-  if (guide.examples?.length) ctx.print(`  example: ${guide.examples.join(' | ')}`);
+  printHelp(ctx, '');
+  printHelp(ctx, commandLabel(command));
+  printHelp(ctx, `  ${commandDescription(command)}`);
+  if (guide.syntax) printHelp(ctx, `  syntax: ${guide.syntax}`);
+  if (guide.examples?.length) printHelp(ctx, `  example: ${guide.examples.join(' | ')}`);
+}
+
+function printHelp(ctx, line) {
+  ctx.print(line, 'help-text');
 }

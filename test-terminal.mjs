@@ -180,7 +180,7 @@ const visibleCommands = registry.filter((command) => command.enabled !== false &
 const helpText = result.state.printed.join('\n');
 check('help lists every guest-visible registry command', visibleCommands.every((command) => helpText.includes(command.name)));
 check('help does not end with vague extra-command teaser', !helpText.includes("there's more"));
-check('help exposes discovery syntax', /help <command>/.test(helpText) && /tab/.test(helpText));
+check('help hides discovery guidance by default', !/help <command>|syntax:|example:|tab/.test(helpText));
 check('help does not expose command categories', !/^(core|places|toys|system|utility|cone|games|network|lore|maintenance|data|visual|other):$/m.test(helpText));
 check('help descriptions are not category fallbacks', !/(simulated .* command|browser-local (utility|mini-game|command)|traffic-cone lore\/control command|site lore response|visual terminal output)/.test(helpText));
 
@@ -195,6 +195,15 @@ check('help number does not include category', !result.state.printed.join('\n').
 
 result = await runCommand({ name: 'help', ui: 'text' }, ['play'], 'help play');
 check('help play does not advertise unimplemented next command', !result.state.printed.join('\n').includes('play next'));
+
+result = await runCommand({ name: 'number', ui: 'client-task' }, ['-h'], 'number -h');
+check('number -h includes syntax and example', /syntax: number/.test(result.state.printed.join('\n')) && /number 37/.test(result.state.printed.join('\n')));
+
+result = await runCommand({ name: 'cone', ui: 'client-task' }, ['/?'], 'cone /?');
+check('cone /? includes purpose and syntax', /toggle cone signal/.test(result.state.printed.join('\n')) && /syntax: cone/.test(result.state.printed.join('\n')));
+
+result = await runCommand({ name: 'help', ui: 'text' }, ['-h'], 'help -h');
+check('help -h includes help command syntax', /syntax: help/.test(result.state.printed.join('\n')));
 
 // half-wired registered command falls to unknown (no tells)
 result = await runCommand({ name: 'ghost', ui: 'text' }, [], 'ghost');

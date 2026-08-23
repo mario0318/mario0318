@@ -76,7 +76,6 @@ export function respondUtility(name, args, ctx) {
     session.cone = !session.cone;
     if (session.cone) {
       out('cone signal online. it is the site lore/status channel, not a real sensor.');
-      out('try `status`, `glare`, `watch`, `reflect`, or `cone-id`.');
     } else {
       out('cone signal offline. lore channel folded back into storage.');
     }
@@ -93,7 +92,6 @@ export function respondUtility(name, args, ctx) {
     if (session.number == null) session.number = 1 + Math.floor(Math.random() * 100);
     if (!args.length) {
       out('number game active: guess an integer from 1 to 100.');
-      out('syntax: `number <guess>` · example: `number 37` · reset: `number reset`');
       return true;
     }
     const n = Number(args[0]);
@@ -114,7 +112,6 @@ export function respondUtility(name, args, ctx) {
   if (name === 'kill' || name === 'umount') { out(`${name}: operation refused by imaginary kernel.`); return true; }
   if (name === 'auth' || name === 'permit') { out('guest session confirmed. privilege escalation unavailable.'); return true; }
   if (name === 'log') { staticLines.watch.forEach(out); return true; }
-  if (name === 'man') { out('matrix commands: system · cone · games · network · lore · maintenance · utility'); out('try `ls`, `status`, `number`, `ping`, `about`, `calc`, or `orbit`.'); return true; }
   if (name === 'mkdir') { out(`created ${args[0]||'folder'}/. it will not survive a refresh.`); return true; }
   if (name === 'touch') { out(`touched ${args[0]||'file'}. timestamp updated, substance unchanged.`); return true; }
   if (name === 'rm') { out(`rm: ${args[0]||'file'}: permission theoretically granted, action withheld.`); return true; }

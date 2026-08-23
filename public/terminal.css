@@ -236,6 +236,9 @@ body {
   animation: line-in var(--t-med) var(--ease) both;
 }
 .line.dim { color: var(--text-dim); }
+.line.help-text {
+  color: color-mix(in srgb, var(--text-dim) 72%, var(--bg));
+}
 .line.echo { color: var(--text-dim); }
 .line.echo-command {
   color: var(--cmd-green);

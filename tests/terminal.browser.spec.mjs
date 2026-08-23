@@ -144,6 +144,38 @@ test('long terminal output scrolls only inside the terminal output area', async 
   await expectNoDocumentOverflow(page);
 });
 
+test('help output is visually dimmer than command text', async ({ page }) => {
+  await openTerminal(page, { width: 390, height: 844 });
+  await runCommand(page, 'help');
+  await expect(page.locator('#out')).toContainText('commands:');
+
+  const colors = await page.evaluate(() => {
+    const commandEcho = Array.from(document.querySelectorAll('#out .line.echo-command')).at(-1);
+    const helpLine = Array.from(document.querySelectorAll('#out .line.help-text'))
+      .find((line) => line.textContent?.includes('commands:'));
+    const rgb = (value) => (value.match(/\d+(\.\d+)?/g) || []).slice(0, 3).map(Number);
+    const luminance = (value) => {
+      const [r, g, b] = rgb(value).map((channel) => {
+        const c = channel / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const commandColor = getComputedStyle(commandEcho).color;
+    const helpColor = getComputedStyle(helpLine).color;
+    return {
+      commandColor,
+      helpColor,
+      commandLuminance: luminance(commandColor),
+      helpLuminance: luminance(helpColor),
+      helpClass: helpLine?.className,
+    };
+  });
+
+  expect(colors.helpClass).toContain('help-text');
+  expect(colors.helpLuminance).toBeLessThan(colors.commandLuminance);
+});
+
 test('command input highlights commands and interactive aliases', async ({ page }) => {
   await openTerminal(page, { width: 390, height: 844 });
 
@@ -165,10 +197,48 @@ test('command input highlights commands and interactive aliases', async ({ page 
   await expect(page.locator('#cmd')).toHaveAttribute('data-token-state', 'default');
 });
 
+test('default help hides command guidance until command help flags are used', async ({ page }) => {
+  await openTerminal(page, { width: 390, height: 844 });
+
+  await runCommand(page, 'help');
+  await expect(page.locator('#out')).toContainText('commands:');
+  await expect(page.locator('#out')).toContainText('play');
+  await expect(page.locator('#out')).not.toContainText('syntax:');
+  await expect(page.locator('#out')).not.toContainText('example:');
+  await expect(page.locator('#out')).not.toContainText('play a vault audio clip');
+  await expect(page.locator('#out')).not.toContainText('help <command>');
+
+  await runCommand(page, 'play -h');
+  await expect(page.locator('#out')).toContainText('syntax: play | play list');
+  await expect(page.locator('#out')).toContainText('example: play | play list');
+
+  await runCommand(page, 'number /?');
+  await expect(page.locator('#out')).toContainText('syntax: number | number <1-100>');
+
+  await runCommand(page, 'cone -help');
+  await expect(page.locator('#out')).toContainText('toggle cone signal');
+  await expect(page.locator('#out')).toContainText('syntax: cone');
+
+  await runCommand(page, 'help -h');
+  await expect(page.locator('#out')).toContainText('syntax: help [command] | help keys');
+});
+
+test('normal command output does not append hidden guidance', async ({ page }) => {
+  await openTerminal(page, { width: 390, height: 844 });
+
+  await runCommand(page, 'number');
+  await expect(page.locator('#out')).toContainText('number game active: guess an integer from 1 to 100.');
+  await expect(page.locator('#out')).not.toContainText('syntax: `number <guess>`');
+
+  await runCommand(page, 'cone');
+  await expect(page.locator('#out')).toContainText('cone signal online. it is the site lore/status channel, not a real sensor.');
+  await expect(page.locator('#out')).not.toContainText('try `status`, `glare`, `watch`, `reflect`, or `cone-id`.');
+});
+
 test('completed commands do not emit stale timeout messages', async ({ page }) => {
   await openTerminal(page, { width: 390, height: 844 });
   await runCommand(page, 'help');
-  await expect(page.locator('#out')).toContainText('guest command index:');
+  await expect(page.locator('#out')).toContainText('commands:');
   await page.waitForTimeout(8500);
   await expect(page.locator('#out')).not.toContainText('command timed out');
   await expect(page.locator('.dots')).not.toHaveClass(/working/, { timeout: 1500 });
@@ -201,7 +271,7 @@ test('specific repaired commands complete and leave no stuck working state', asy
   await expect(page.locator('.dots')).not.toHaveClass(/working/, { timeout: 1500 });
 
   await runCommand(page, 'help');
-  await expect(page.locator('#out')).toContainText('guest command index:');
+  await expect(page.locator('#out')).toContainText('commands:');
   await expect(page.locator('#out')).not.toContainText("there's more");
   await expect(page.locator('.dots')).not.toHaveClass(/working/, { timeout: 1500 });
 
