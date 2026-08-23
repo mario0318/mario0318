@@ -165,6 +165,15 @@ test('command input highlights commands and interactive aliases', async ({ page 
   await expect(page.locator('#cmd')).toHaveAttribute('data-token-state', 'default');
 });
 
+test('completed commands do not emit stale timeout messages', async ({ page }) => {
+  await openTerminal(page, { width: 390, height: 844 });
+  await runCommand(page, 'help');
+  await expect(page.locator('#out')).toContainText('guest command index:');
+  await page.waitForTimeout(8500);
+  await expect(page.locator('#out')).not.toContainText('command timed out');
+  await expect(page.locator('.dots')).not.toHaveClass(/working/, { timeout: 1500 });
+});
+
 test('specific repaired commands complete and leave no stuck working state', async ({ page }) => {
   await openTerminal(page, { width: 390, height: 844 });
 

@@ -366,15 +366,20 @@ async function run(raw) {
 
   const before = el.out.childElementCount;
   let handled = false;
+  let timeoutId = null;
   try {
-    handled = await Promise.race([
-      Promise.resolve(respond(command, args, ctx)),
-      new Promise((resolve) => setTimeout(() => {
-        print('command timed out. nothing is still running.');
-        resolve(false);
-      }, COMMAND_TIMEOUT_MS)),
+    const timeout = new Promise((resolve) => {
+      timeoutId = setTimeout(() => resolve({ timedOut: true, handled: false }), COMMAND_TIMEOUT_MS);
+    });
+    const outcome = await Promise.race([
+      Promise.resolve(respond(command, args, ctx)).then((value) => ({ timedOut: false, handled: value })),
+      timeout,
     ]);
+    if (timeoutId) clearTimeout(timeoutId);
+    if (outcome.timedOut) print('command timed out. nothing is still running.');
+    handled = outcome.handled;
   } catch {
+    if (timeoutId) clearTimeout(timeoutId);
     print('command failed cleanly. no state left hanging.');
     handled = false;
   }
