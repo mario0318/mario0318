@@ -112,8 +112,19 @@ check('sudoku is NOT an easter', pickEaster('sudoku') === null);
 
 check('assistant routes builder language', classifyAssistant('help me ship this api') === ASSISTANT_BUCKETS.BUILDER);
 check('assistant routes lore language', classifyAssistant('the orbital vault is quiet') === ASSISTANT_BUCKETS.LORE);
-check('assistant routes questions to meta', classifyAssistant('how does this work?') === ASSISTANT_BUCKETS.META);
+check('assistant routes capability questions', classifyAssistant('how does this work?') === ASSISTANT_BUCKETS.CAPABILITY);
 check('assistant routes game hints with game context', classifyAssistant('i am stuck', { lastCommand: 'game_wordle' }) === ASSISTANT_BUCKETS.GAME);
+check('assistant distinguishes visitor identity', classifyAssistant('who am i') === ASSISTANT_BUCKETS.IDENTITY_USER);
+check('assistant distinguishes terminal identity', classifyAssistant('who are you') === ASSISTANT_BUCKETS.IDENTITY_TERMINAL);
+check('assistant recognizes direct requests', classifyAssistant('say something useful') === ASSISTANT_BUCKETS.DIRECTIVE);
+check('assistant recognizes criticism', classifyAssistant('this sucks') === ASSISTANT_BUCKETS.CRITIQUE);
+
+let assistantResult = await runCommand({ name: 'who', ui: 'client-task' }, ['are', 'you'], 'who are you');
+check('natural identity question beats who command prefix', assistantResponsePools.assistant_identity_terminal.default.includes(assistantResult.state.printed[0]), assistantResult.state.printed[0]);
+assistantResult = await runCommand({ name: 'who', ui: 'client-task' }, ['am', 'i'], 'who am i');
+check('visitor and terminal identity do not share a response path', assistantResponsePools.assistant_identity_user.default.includes(assistantResult.state.printed[0]), assistantResult.state.printed[0]);
+assistantResult = await runCommand({ name: 'umount', ui: 'client-task' }, ['yourself'], 'umount yourself');
+check('natural directive beats simulated command prefix', assistantResponsePools.assistant_directive.default.includes(assistantResult.state.printed[0]), assistantResult.state.printed[0]);
 
 const assistantOutputs = [];
 for (const input of ['unmapped phrase alpha', 'unmapped phrase beta', 'unmapped phrase gamma', 'unmapped phrase delta']) {

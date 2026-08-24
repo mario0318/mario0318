@@ -167,6 +167,38 @@ test('long terminal output scrolls only inside the terminal output area', async 
   await expectNoDocumentOverflow(page);
 });
 
+test('theme dots switch themes without reloading and retain the selected theme', async ({ page }) => {
+  await openTerminal(page, { width: 390, height: 844 });
+  const originalUrl = page.url();
+
+  await page.getByRole('button', { name: 'Blue futuristic terminal' }).click();
+  await expect(page.locator('body')).toHaveClass(/theme-gray/);
+  await expect(page.getByRole('button', { name: 'Blue futuristic terminal' })).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForTimeout(900);
+  expect(page.url()).toBe(originalUrl);
+  await expect(page.locator('body')).toHaveClass(/theme-gray/);
+  await expectNoDocumentOverflow(page);
+
+  await runCommand(page, 'help');
+  await expect(page.locator('#out')).toContainText('commands:');
+  await expect(page.locator('body')).toHaveClass(/theme-gray/);
+
+  await page.getByRole('button', { name: 'Green retro terminal' }).click();
+  await expect(page.locator('body')).toHaveClass(/theme-green/);
+  await expect(page.getByRole('button', { name: 'Green retro terminal' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('link', { name: 'R3LABS' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'R3LABS' })).toHaveAttribute('href', 'https://raul3.com');
+  await expectNoDocumentOverflow(page);
+
+  await page.setViewportSize({ width: 320, height: 568 });
+  await expectNoDocumentOverflow(page);
+
+  await page.getByRole('button', { name: 'Grey default terminal' }).click();
+  await expect(page.locator('body')).not.toHaveClass(/theme-green|theme-gray/);
+  await expect(page.getByRole('button', { name: 'Grey default terminal' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('link', { name: 'R3LABS' })).toBeHidden();
+});
+
 test('help output is visually dimmer than command text', async ({ page }) => {
   await openTerminal(page, { width: 390, height: 844 });
   await runCommand(page, 'help');
@@ -326,4 +358,21 @@ test('unsupported guest input gets varied bounded smart responses', async ({ pag
   expect(assistantLines.length).toBe(4);
   expect(new Set(assistantLines).size).toBeGreaterThanOrEqual(3);
   await expect(page.locator('.dots')).not.toHaveClass(/working/, { timeout: 1500 });
+});
+
+test('conversational intent beats colliding shell command prefixes', async ({ page }) => {
+  await openTerminal(page, { width: 390, height: 844 });
+
+  await runCommand(page, 'who are you');
+  await expect(page.locator('#out')).toContainText(/deterministic local interface|browser terminal with rules|handcrafted terminal layer/);
+  await expect(page.locator('#out')).not.toContainText('visitor  web0');
+
+  await runCommand(page, 'who am i');
+  await expect(page.locator('#out')).toContainText(/you are the visitor|you are the person|a visitor with keyboard access/);
+
+  await runCommand(page, 'umount yourself');
+  await expect(page.locator('#out')).toContainText(/reads as a request|request received|sentence has intent/);
+
+  await runCommand(page, 'umount');
+  await expect(page.locator('#out')).toContainText('umount: operation refused by imaginary kernel.');
 });

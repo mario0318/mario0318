@@ -39,8 +39,9 @@ export async function respond(command, args, ctx) {
     if (gameInput(raw, raw.split(/\s+/).slice(1), ctx)) return true;
   }
 
+  const raw = ctx.rawInput.trim();
+
   if (!command) {
-    const raw = ctx.rawInput.trim();
     const normalized = raw.toLowerCase().replace(/\s+/g, ' ');
     if (normalized === 'orbit' || normalized === 'open orbit' || normalized === 'three body') {
       const line = pickLine('easter', 'orbit');
@@ -48,22 +49,33 @@ export async function respond(command, args, ctx) {
       ctx.navigate?.('/orbital.html');
       return true;
     }
-    const line = pickEaster(raw) || pickWordChatter(raw);
-    if (line) {
-      ctx.print(line);
+    const easter = pickEaster(raw);
+    if (easter) {
+      ctx.print(easter);
       return false;
     }
     if (respondAssistant(raw, ctx)) return true;
+    const wordChatter = pickWordChatter(raw);
+    if (wordChatter) {
+      ctx.print(wordChatter);
+      return false;
+    }
     const chatter = pickChatter(raw);
     if (chatter) {
       ctx.print(chatter);
       return false;
     }
 
+    if (respondAssistant(raw, ctx, { allowUnknown: true })) return false;
     const unknown = formatLine(pickLine('unknown'), { input: raw });
     if (unknown) ctx.print(unknown);
     return false;
   }
+
+  // A sentence with recognizable intent takes precedence over a coincidental
+  // command prefix. Bare `who` still prints terminal identities; `who are you`
+  // answers the actual question.
+  if (respondAssistant(raw, ctx, { onlyConversational: true })) return true;
 
   const helpFlag = extractHelpFlag(args);
   if (helpFlag && command.name !== 'help' && command.name !== 'man') {

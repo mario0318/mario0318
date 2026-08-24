@@ -29,22 +29,21 @@
   <main id="term" class="term" hidden>
     <header class="term-head">
       <div class="term-id" aria-label="mario0318 web terminal">
+        <span class="dots idle" role="group" aria-label="terminal themes">
+          <button class="dot-button" type="button" data-theme="blue" aria-label="Blue futuristic terminal" aria-pressed="false"><span class="dot d1"></span></button><button class="dot-button" type="button" data-theme="green" aria-label="Green retro terminal" aria-pressed="false"><span class="dot d2"></span></button><button class="dot-button" type="button" data-theme="gray" aria-label="Grey default terminal" aria-pressed="true"><span class="dot d3"></span></button>
+        </span>
         <a class="term-logo" href="/" aria-label="mario0318 home">
-          <span class="dots idle" role="img" aria-label="terminal ready">
-            <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
-          </span>
           <span class="term-session">mario0318@web</span>
         </a>
       </div>
       <nav class="term-channels" aria-label="mario0318 channels">
-        <button id="raul3-channel" class="channel channel-raul3" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="portal" aria-label="open R3 Labs links">
-          <span class="channel-dot" aria-hidden="true"></span><span class="channel-label" data-short="R3" aria-hidden="true">R3 Labs</span><span class="channel-caret" aria-hidden="true">+</span>
-        </button>
+        <a class="raul3-logo-link" href="https://raul3.com" aria-label="R3 Labs on raul3.com"><img class="raul3-logo" src="https://raul3.com/assets/brand/r3-logo.png?v=20260708-nobox" alt="R3labs"></a>
+        <a class="r3labs-retro-link" href="https://raul3.com">R3LABS</a>
       </nav>
     </header>
     <div id="out" class="term-out" role="log" aria-live="polite" aria-atomic="false"></div>
     <form id="prompt" class="term-prompt">
-      <span class="ps1" aria-hidden="true"><span class="ps1-user">guest</span><span class="ps1-at">@</span><span class="ps1-host">m318</span><span class="ps1-path">:~</span><span class="ps1-char">$</span></span>
+      <span class="ps1" aria-hidden="true"><span class="ps1-user">user</span><span class="ps1-at">@</span><span class="ps1-host">[unknown]</span><span class="ps1-path">:~</span><span class="ps1-char">$</span></span>
       <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
              enterkeyhint="go" aria-label="terminal command input"
              placeholder="type help, then press Enter">

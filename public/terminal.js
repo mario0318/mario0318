@@ -23,6 +23,7 @@ let registry = [];
 let byName = new Map();
 let history = [];
 let histIdx = -1;
+let lastCommandName = null;
 let openApplet = null;
 let dotTimer = null;
 
@@ -362,6 +363,7 @@ async function run(raw) {
     audioVault,
     analemmaLive: true,
     history: history.slice(),
+    lastCommand: lastCommandName,
   };
 
   const before = el.out.childElementCount;
@@ -392,6 +394,7 @@ async function run(raw) {
     if (last && produced) last.classList.add('shiver');
     setDots('err');
   }
+  if (command?.name) lastCommandName = command.name;
   stagger = 0;
 }
 
@@ -415,6 +418,25 @@ async function boot() {
   el.term = $('term'); el.out = $('out'); el.cmd = $('cmd');
   el.dots = document.querySelector('.dots');
   el.portal = $('portal'); el.panel = $('panel');
+
+  // Public address is display-only. A failed lookup remains a valid prompt.
+  fetch('https://api.ipify.org?format=json', { cache: 'no-store', signal: AbortSignal.timeout(3500) })
+    .then((r) => r.ok ? r.json() : Promise.reject(new Error('ip lookup failed')))
+    .then((data) => { const ip = String(data.ip || '').trim(); if (/^[0-9a-f:.]+$/i.test(ip)) document.querySelector('.ps1-host').textContent = ip; })
+    .catch(() => {});
+
+  document.querySelectorAll('.dot-button').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const theme = button.dataset.theme;
+      document.body.classList.remove('theme-green', 'theme-gray');
+      if (theme === 'green') document.body.classList.add('theme-green');
+      if (theme === 'blue') document.body.classList.add('theme-gray');
+      document.querySelectorAll('.dot-button').forEach((item) => item.setAttribute('aria-pressed', item === button ? 'true' : 'false'));
+      el.cmd.focus();
+    });
+  });
 
   try {
     const r = await fetch('commands.public.json', { cache: 'no-store' });
@@ -469,13 +491,6 @@ async function boot() {
   }
 
   el.cmd.focus();
-
-  $('raul3-channel').addEventListener('click', () => {
-    const channel = $('raul3-channel');
-    channel.setAttribute('aria-expanded', 'true');
-    openPortal('raul3');
-  });
-  el.portal.addEventListener('close', () => $('raul3-channel').setAttribute('aria-expanded', 'false'));
 
   $('prompt').addEventListener('submit', (e) => {
     e.preventDefault();
