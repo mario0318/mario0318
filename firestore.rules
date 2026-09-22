@@ -21,6 +21,40 @@ service cloud.firestore {
       allow read, write: if isMario() && owner == request.auth.uid;
     }
 
+    // raul3.com guestbook. Anyone can read. Posting needs a signed-in account
+    // with a verified email, and goes out as a batch with the poster's
+    // guestbookPosters doc so the one-post-a-minute limit is enforced here,
+    // not in the page.
+    match /guestbook/{entryId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'message', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 2
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/guestbookPosters/$(request.auth.uid)).data.lastPost == request.time;
+      allow delete: if isMario()
+        || (request.auth != null && resource.data.uid == request.auth.uid);
+    }
+
+    match /guestbookPosters/{uid} {
+      allow create: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastPost'])
+        && request.resource.data.lastPost == request.time;
+      allow update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastPost'])
+        && request.resource.data.lastPost == request.time
+        && request.time > resource.data.lastPost + duration.value(60, 's');
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
