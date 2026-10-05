@@ -316,7 +316,7 @@ function present(s, ctx, kind, text) {
   } else {
     s.phase = 'ask';
     s.pending = text;
-    ctx.print(`q${s.n + 1}: ${text}`);
+    ctx.print(`q${s.n + 1}: ${/[?]$/.test(text) ? text : text + "?"}`);
   }
   return false;
 }

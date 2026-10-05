@@ -68,7 +68,7 @@ const PROVIDERS = {
   gemini: {
     key: () => env("GEMINI_API_KEY"),
     async ask(key, system, user, signal) {
-      const model = env("GEMINI_MODEL") || "gemini-2.5-flash-lite";
+      const model = env("GEMINI_MODEL") || "gemini-3.5-flash-lite";
       const base = env("GEMINI_API_URL") || "https://generativelanguage.googleapis.com/v1beta/models";
       const r = await fetch(base + "/" + model + ":generateContent", {
         method: "POST",
@@ -88,7 +88,7 @@ const PROVIDERS = {
   groq: {
     key: () => env("GROQ_API_KEY"),
     async ask(key, system, user, signal) {
-      const model = env("GROQ_MODEL") || "openai/gpt-oss-120b";
+      const model = env("GROQ_MODEL") || "openai/gpt-oss-20b";
       const r = await fetch(env("GROQ_API_URL") || "https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: "Bearer " + key },
