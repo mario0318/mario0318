@@ -11,6 +11,8 @@
 //
 // Output only via ctx.print(text) -> textContent. No HTML.
 
+import * as tq from './terminal-twenty-questions.js';
+
 let game = null; // { type, data }
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -19,20 +21,26 @@ function rint(min, max) { return min + Math.floor(Math.random() * (max - min + 1
 const WORDS = ['signal', 'orbital', 'cone', 'terminal', 'vault', 'static', 'traffic', 'reflect', 'analemma', 'dungeon', 'cursor', 'matrix', 'render', 'kernel'];
 const WORDS5 = ['vault', 'orbit', 'cargo', 'shift', 'crane', 'panel', 'input', 'light', 'sound', 'trace', 'pulse', 'frame', 'glare'];
 
+// One exit vocabulary for every interactive mode. dispatch uses it for open
+// panels and portals too, so the same word always gets you back to the prompt.
+export const EXIT_WORDS = new Set(['exit', 'quit', 'stop', ':q', 'esc']);
+
 export function isGameActive() { return !!game; }
+export function activeGameName() { return game ? game.type : null; }
 
 export function stopGame(ctx) {
   if (!game) return false;
   const type = game.type;
+  if (game.data) game.data.stopped = true;
   game = null;
-  ctx.print(`${type}: session ended. back to the prompt.`);
+  ctx.print(`${type}: left. back at the prompt.`);
   return true;
 }
 
 export function gameInput(raw, args, ctx) {
   if (!game) return false;
   const norm = raw.trim().toLowerCase();
-  if (norm === 'stop' || norm === 'quit' || norm === 'q') return stopGame(ctx);
+  if (EXIT_WORDS.has(norm)) return stopGame(ctx);
   const handler = handlers[game.type];
   if (!handler) { game = null; return false; }
   return handler.move(raw, args, ctx);
@@ -42,8 +50,7 @@ export function startGame(name, args, ctx) {
   const handler = handlers[name];
   if (!handler) return false;
   game = { type: name, data: handler.init() };
-  handler.render(ctx, true);
-  return true;
+  return Promise.resolve(handler.render(ctx, true)).then(() => true);
 }
 
 // ---------------------------------------------------------------- tictactoe
@@ -183,10 +190,21 @@ const QUIZ = [
 // ------------------------------------------------------------------- handlers
 
 const handlers = {
+  '20q': {
+    init() { return tq.init(); },
+    render(ctx, intro) { if (intro) return tq.start(game.data, ctx); },
+    async move(raw, args, ctx) {
+      const state = game.data;
+      const done = await tq.step(state, raw, ctx);
+      if (done && game && game.data === state) game = null;
+      return true;
+    },
+  },
+
   tictactoe: {
     init() { return { board: Array(9).fill(null) }; },
     render(ctx, intro) {
-      if (intro) ctx.print('tictactoe: you are X. play a cell like `b2`. `stop` to bail.');
+      if (intro) ctx.print('tictactoe: you are X. play a cell like `b2`. `exit` to leave.');
       printBoard(ctx, game.data.board);
     },
     move(raw, args, ctx) {
@@ -216,7 +234,7 @@ const handlers = {
     init() { return { word: pick(WORDS), guessed: new Set(), misses: 0, max: 6 }; },
     render(ctx, intro) {
       const { word, guessed, misses, max } = game.data;
-      if (intro) ctx.print('hangman: guess one letter at a time. `stop` to bail.');
+      if (intro) ctx.print('hangman: guess one letter at a time. `exit` to leave.');
       ctx.print(word.split('').map((c) => (guessed.has(c) ? c : '_')).join(' '));
       ctx.print(`misses: ${misses}/${max}`);
     },
@@ -238,7 +256,7 @@ const handlers = {
   wordle: {
     init() { return { answer: pick(WORDS5), guesses: [], max: 6 }; },
     render(ctx, intro) {
-      if (intro) ctx.print('wordle: guess a 5-letter word. `stop` to bail.');
+      if (intro) ctx.print('wordle: guess a 5-letter word. `exit` to leave.');
       for (const g of game.data.guesses) ctx.print(g.word + '  ' + g.feedback);
       ctx.print(`${game.data.guesses.length}/${game.data.max}`);
     },
@@ -258,7 +276,7 @@ const handlers = {
   memory: {
     init() { return { seq: [rint(1, 9)] }; },
     render(ctx, intro) {
-      if (intro) ctx.print('memory: remember the sequence, repeat it space-separated. `stop` to bail.');
+      if (intro) ctx.print('memory: remember the sequence, repeat it space-separated. `exit` to leave.');
       ctx.print('sequence: ' + game.data.seq.join(' '));
       ctx.print('repeat it.');
     },
@@ -277,7 +295,7 @@ const handlers = {
   quiz: {
     init() { return { i: 0, score: 0 }; },
     render(ctx, intro) {
-      if (intro) ctx.print('quiz: six questions. `stop` to bail.');
+      if (intro) ctx.print('quiz: six questions. `exit` to leave.');
       ctx.print(`q${game.data.i + 1}: ${QUIZ[game.data.i].q}`);
     },
     move(raw, args, ctx) {
@@ -295,7 +313,7 @@ const handlers = {
   mastermind: {
     init() { return { code: Array.from({ length: 4 }, () => rint(1, 6)), tries: 0, max: 10 }; },
     render(ctx, intro) {
-      if (intro) ctx.print('mastermind: 4 digits, 1-6, repeats allowed. guess like `3 1 4 2`. `stop` to bail.');
+      if (intro) ctx.print('mastermind: 4 digits, 1-6, repeats allowed. guess like `3 1 4 2`. `exit` to leave.');
     },
     move(raw, args, ctx) {
       const guess = raw.trim().split(/\s+/).map(Number);
@@ -326,7 +344,7 @@ const handlers = {
   maze: {
     init() { return { room: 'start' }; },
     render(ctx, intro) {
-      if (intro) ctx.print('maze: move with n/s/e/w. `stop` to bail.');
+      if (intro) ctx.print('maze: move with n/s/e/w. `exit` to leave.');
       ctx.print(MAZE_ROOMS[game.data.room].desc);
     },
     move(raw, args, ctx) {
@@ -349,7 +367,7 @@ const handlers = {
   dungeon: {
     init() { return { room: 'entry', inv: [], taken: new Set() }; },
     render(ctx, intro) {
-      if (intro) ctx.print('dungeon: go <dir>, look, take <item>, inventory. `stop` to bail.');
+      if (intro) ctx.print('dungeon: go <dir>, look, take <item>, inventory. `exit` to leave.');
       ctx.print(DUNGEON_ROOMS[game.data.room].desc);
     },
     move(raw, args, ctx) {
@@ -387,7 +405,7 @@ const handlers = {
       return { board, solution };
     },
     render(ctx, intro) {
-      if (intro) ctx.print('sudoku: 4x4. `sudoku set r c v` (1-4 each). `stop` to bail.');
+      if (intro) ctx.print('sudoku: 4x4. `sudoku set r c v` (1-4 each). `exit` to leave.');
       for (const row of game.data.board) ctx.print(row.map((v) => v || '.').join(' '));
     },
     move(raw, args, ctx) {
@@ -414,7 +432,7 @@ const handlers = {
       return { size, body, dir: 'right', apple: spawnApple(size, body), score: 0 };
     },
     render(ctx, intro) {
-      if (intro) ctx.print('snake: move with u/d/l/r, one step per command. `stop` to bail.');
+      if (intro) ctx.print('snake: move with u/d/l/r, one step per command. `exit` to leave.');
       printSnake(ctx, game.data);
     },
     move(raw, args, ctx) {
@@ -451,7 +469,7 @@ const handlers = {
   pong: {
     init() { return { w: 10, h: 6, py: 2, oy: 2, ball: [2, 5], vel: [pick([-1, 1]), -1], score: 0, misses: 0 }; },
     render(ctx, intro) {
-      if (intro) ctx.print('pong: move with u/d, hold with s. `stop` to bail.');
+      if (intro) ctx.print('pong: move with u/d, hold with s. `exit` to leave.');
       printPong(ctx, game.data);
     },
     move(raw, args, ctx) {
@@ -483,7 +501,7 @@ const handlers = {
   tetris: {
     init() { return { w: 6, h: 10, grid: Array.from({ length: 10 }, () => Array(6).fill(0)), score: 0 }; },
     render(ctx, intro) {
-      if (intro) ctx.print('tetris: drop a block into a column, `tetris <col 1-6>`. clear full rows. `stop` to bail.');
+      if (intro) ctx.print('tetris: drop a block into a column, `tetris <col 1-6>`. clear full rows. `exit` to leave.');
       printTetris(ctx, game.data);
     },
     move(raw, args, ctx) {

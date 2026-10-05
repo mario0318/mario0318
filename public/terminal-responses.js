@@ -18,6 +18,7 @@ let responsePools = {
       '  tab        complete, not move focus',
       '  esc        escape, then tab to move focus',
       '  esc again  close panels and portals',
+      '  exit       leave a game or close a panel (esc works too)',
       'reduced-motion and screen readers get the same commands. the dots behave differently, not the keys.',
     ],
   },

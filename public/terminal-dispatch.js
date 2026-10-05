@@ -26,7 +26,7 @@
 
 import { pickLine, formatLine, pickEaster, pickWordChatter, pickChatter, helpKeysLines } from './terminal-responses.js';
 import { respondUtility } from './terminal-utilities.js';
-import { isGameActive, gameInput } from './terminal-games.js';
+import { isGameActive, gameInput, stopGame, EXIT_WORDS } from './terminal-games.js';
 import { respondAssistant } from './terminal-assistant.js';
 
 // respond() returns true when the input produced a real outcome (dots -> ok)
@@ -36,7 +36,14 @@ export async function respond(command, args, ctx) {
   // universal UI escapes, which must always work no matter what's active.
   if (isGameActive() && !(command && (command.name === 'clear' || command.name === 'close'))) {
     const raw = ctx.rawInput.trim();
-    if (gameInput(raw, raw.split(/\s+/).slice(1), ctx)) return true;
+    if (await gameInput(raw, raw.split(/\s+/).slice(1), ctx)) return true;
+  }
+
+  // Same exit words for panels, portals and inline applets as for games.
+  if (!isGameActive() && ctx.anyUiOpen() && EXIT_WORDS.has(ctx.rawInput.trim().toLowerCase())) {
+    await ctx.closeAll();
+    say(ctx, 'close');
+    return true;
   }
 
   const raw = ctx.rawInput.trim();
@@ -163,14 +170,15 @@ export async function respond(command, args, ctx) {
     }
 
     case 'close': {
-      const variant = ctx.anyUiOpen() ? 'default' : 'nothing';
+      const hadGame = stopGame(ctx);
+      const variant = ctx.anyUiOpen() || hadGame ? 'default' : 'nothing';
       ctx.closeAll();
       say(ctx, 'close', variant);
       return true;
     }
 
     default: {
-      if (respondUtility(command.name, args, ctx)) return true;
+      if (await respondUtility(command.name, args, ctx)) return true;
       if (command.action?.type === 'response' || command.action?.type === 'client-task') {
         const custom = pickLine(command.responsePool || command.name);
         if (custom) {
@@ -265,6 +273,7 @@ const DESCRIPTION_OVERRIDES = {
   maze: 'navigate a tiny maze',
   mastermind: 'crack a four-digit code',
   sudoku: 'solve a tiny sudoku row',
+  '20q': 'think of something, the terminal guesses',
   ping: 'check fake latency',
   traceroute: 'trace a fake route',
   nslookup: 'look up a pretend host',
@@ -330,6 +339,7 @@ const COMMAND_GUIDE = {
   calc: { syntax: 'calc <arithmetic>', examples: ['calc 3 * 18'] },
   timer: { syntax: 'timer [seconds 0-60]', examples: ['timer 5'] },
   cone: { syntax: 'cone', examples: ['cone', 'status'] },
+  '20q': { syntax: '20q', examples: ['20q', 'exit to leave'] },
   rps: { syntax: 'rps [rock|paper|scissors]', examples: ['rps scissors'] },
   number: { syntax: 'number | number <1-100>', examples: ['number', 'number 37'] },
   ping: { syntax: 'ping [target]', examples: ['ping orbital.gateway'] },

@@ -197,7 +197,7 @@ check('help descriptions are not category fallbacks', !/(simulated .* command|br
 
 // help keys prints verbatim block
 result = await runCommand({ name: 'help', ui: 'text' }, ['keys'], 'help keys');
-check('help keys verbatim', result.state.printed[0] === 'keyboard things:' && result.state.printed.length === 6);
+check('help keys verbatim', result.state.printed[0] === 'keyboard things:' && result.state.printed.length === 7 && result.state.printed.some((l) => /exit/.test(l)));
 
 // command-specific help
 result = await runCommand({ name: 'help', ui: 'text' }, ['number'], 'help number');

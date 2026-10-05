@@ -2,7 +2,7 @@
 import { startGame } from './terminal-games.js';
 
 const session = { cwd: '~', cone: false, idle: false, clicks: 0, number: null };
-const GAME_NAMES = ['tictactoe', 'hangman', 'snake', 'dungeon', 'wordle', 'memory', 'quiz', 'pong', 'tetris', 'maze', 'mastermind', 'sudoku'];
+const GAME_NAMES = ['20q', 'tictactoe', 'hangman', 'snake', 'dungeon', 'wordle', 'memory', 'quiz', 'pong', 'tetris', 'maze', 'mastermind', 'sudoku'];
 const FORTUNES = [
   'a watched dot never breathes faster.',
   'the terminal remembers what you clear.',
@@ -62,7 +62,7 @@ export function respondUtility(name, args, ctx) {
   const out = (line = '') => ctx.print(line);
   if (staticLines[name]) { staticLines[name].forEach(out); return true; }
   if (name === 'clicker') { out(`signal count: ${++session.clicks}`); return true; }
-  if (GAME_NAMES.includes(name)) { startGame(name, args, ctx); return true; }
+  if (GAME_NAMES.includes(name)) return startGame(name, args, ctx);
   if (name === 'ls') { out('drwxr-xr-x  visitor  projects/'); Object.keys(files).forEach(f=>out(`-rw-r--r--  visitor  ${f}`)); return true; }
   if (name === 'cat') { const key=args[0]||'motd'; (files[key]||[`cat: ${key}: no such signal`]).forEach(out); return true; }
   if (name === 'cd') { session.cwd=args[0]||'~'; out(`path: ${session.cwd}`); return true; }

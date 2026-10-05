@@ -42,6 +42,7 @@
     {"name":"pong","ui":"client-task","category":"games","listed":false},{"name":"tetris","ui":"client-task","category":"games","listed":false},
     {"name":"maze","ui":"client-task","category":"games","listed":false},{"name":"mastermind","ui":"client-task","category":"games","listed":false},
     {"name":"sudoku","ui":"client-task","category":"games","listed":false},
+    {"name":"20q","aliases":["20questions","twentyquestions","twenty"],"desc":"think of something, the terminal guesses","ui":"client-task","category":"games","listed":true},
     {"name":"ping","desc":"simulated latency","ui":"client-task","category":"network","listed":true},
     {"name":"traceroute","ui":"client-task","category":"network","listed":false},{"name":"nslookup","ui":"client-task","category":"network","listed":false},
     {"name":"netstat","ui":"client-task","category":"network","listed":false},{"name":"arp","ui":"client-task","category":"network","listed":false},

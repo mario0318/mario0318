@@ -9,6 +9,7 @@
 
 import { respond, setRegistry } from './terminal-dispatch.js';
 import { configureResponses } from './terminal-responses.js';
+import { activeGameName, stopGame } from './terminal-games.js';
 
 const $ = (id) => document.getElementById(id);
 const el = { term: null, out: null, cmd: null, dots: null, portal: null, panel: null };
@@ -252,6 +253,14 @@ async function unmountApplet() {
   openApplet = null;
 }
 
+// While a game owns input, say so at the prompt and say how to leave.
+function syncMode() {
+  const name = activeGameName();
+  const path = document.querySelector('.ps1-path');
+  if (path) path.textContent = name ? ':~/' + name : ':~';
+  if (el.cmd) el.cmd.placeholder = name ? name + ' running. type exit or press esc to leave' : 'type help, then press Enter';
+}
+
 function anyUiOpen() { return el.portal.open || !!openApplet; }
 
 function navigate(path) {
@@ -396,6 +405,7 @@ async function run(raw) {
   }
   if (command?.name) lastCommandName = command.name;
   stagger = 0;
+  syncMode();
 }
 
 // ---------------------------------------------------------------- completion
@@ -516,7 +526,8 @@ async function boot() {
       el.cmd.value = histIdx > 0 ? history[--histIdx] : (histIdx = -1, '');
       updateInputTone();
     } else if (e.key === 'Escape') {
-      if (anyUiOpen()) closeAll(); else el.cmd.blur();
+      if (activeGameName()) { stagger = 0; stopGame({ print }); syncMode(); }
+      else if (anyUiOpen()) closeAll(); else el.cmd.blur();
     }
   });
 
