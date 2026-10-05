@@ -3,6 +3,8 @@ import { startGame } from './terminal-games.js';
 
 const session = { cwd: '~', cone: false, idle: false, clicks: 0, number: null };
 const GAME_NAMES = ['20q', 'tictactoe', 'hangman', 'snake', 'dungeon', 'wordle', 'memory', 'quiz', 'pong', 'tetris', 'maze', 'mastermind', 'sudoku'];
+// Games with a full real-time screen. `<name> text` still runs the typed version.
+const SCREEN_GAMES = { tetris: 'tetris', snake: 'snake', pong: 'pong', hangman: 'hangman', wordle: 'wordle', '20q': 'twenty-questions' };
 const FORTUNES = [
   'a watched dot never breathes faster.',
   'the terminal remembers what you clear.',
@@ -62,6 +64,10 @@ export function respondUtility(name, args, ctx) {
   const out = (line = '') => ctx.print(line);
   if (staticLines[name]) { staticLines[name].forEach(out); return true; }
   if (name === 'clicker') { out(`signal count: ${++session.clicks}`); return true; }
+  if (SCREEN_GAMES[name] && args[0] !== 'text') {
+    out(`${name}: opening. esc or exit to leave.`);
+    return Promise.resolve(ctx.openPanel(SCREEN_GAMES[name])).then(() => true);
+  }
   if (GAME_NAMES.includes(name)) return startGame(name, args, ctx);
   if (name === 'ls') { out('drwxr-xr-x  visitor  projects/'); Object.keys(files).forEach(f=>out(`-rw-r--r--  visitor  ${f}`)); return true; }
   if (name === 'cat') { const key=args[0]||'motd'; (files[key]||[`cat: ${key}: no such signal`]).forEach(out); return true; }
