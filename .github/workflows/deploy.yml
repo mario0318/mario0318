@@ -1,0 +1,56 @@
+name: deploy
+
+# Deploys mario0318-site to Cloud Run whenever main changes.
+# Auth is keyless (Workload Identity Federation): GitHub mints a short-lived
+# OIDC token, Google swaps it for a ~10 min credential scoped to the
+# github-deployer service account. No key files exist anywhere.
+#
+# Inert until the repo variables GCP_WIF_PROVIDER and GCP_DEPLOY_SA are set
+# (scripts/setup-github-deploy.ps1 prints both).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-mario0318-site
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_DEPLOY_SA != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: terminal tests
+        run: node test-terminal.mjs
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      # Flags mirror deploy-mario0318.ps1 so the 2 deploy paths never disagree.
+      # --allow-unauthenticated is intentionally omitted: the service is already
+      # public, and the deployer role can't (and shouldn't) change IAM policy.
+      - name: deploy to Cloud Run
+        run: gcloud run deploy mario0318-site --source . --region us-central1 --project r3-m318 --platform managed --memory 256Mi --min-instances 0 --max-instances 1 --concurrency 80 --no-cpu-boost --quiet
+
+      - name: smoke check
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://mario0318.com/)
+          echo "mario0318.com -> $code"
+          test "$code" = "200"
