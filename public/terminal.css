@@ -231,7 +231,8 @@ body.terminal-ready::before {
 
 .raul3-logo-link { display: inline-flex; align-items: center; padding: 0 .35rem 0 .8rem; }
 .raul3-logo { display: block; width: auto; height: 44px; max-width: 150px; object-fit: contain; }
-.r3labs-retro-link { display: none; color: inherit; font: inherit; text-decoration: none; }
+.r3labs-retro-link,
+.sungolog-retro-link { display: none; color: inherit; font: inherit; text-decoration: none; }
 
 .term-id > .dots {
   align-self: stretch;
@@ -649,9 +650,11 @@ body.theme-green .term::after { content: ""; position: fixed; inset: 0; pointer-
 body.theme-green .term-head { min-height: 38px; border-bottom-color: #27833f; background: linear-gradient(90deg, rgba(57,255,20,.16), transparent 34%), #061009; }
 body.theme-green .term-head::after { content: "CRT-318  /  SESSION ACTIVE  /  80x25"; margin-left: auto; padding: .72rem 1rem; color: #39ff14; font-size: 10px; letter-spacing: .13em; white-space: nowrap; }
 body.theme-green .term-session, body.theme-green .raul3-logo-link { display: none; }
-body.theme-green .term-brand-img { height: 28px; filter: drop-shadow(0 0 6px rgba(114,255,145,.25)); }
-body.theme-green .r3labs-retro-link { display: inline-flex; align-items: center; min-width: 104px; justify-content: center; padding: 0 1rem; border-left: 1px solid #27833f; color: #72ff91; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-shadow: 0 0 8px rgba(114,255,145,.5); }
-body.theme-green .r3labs-retro-link:hover, body.theme-green .r3labs-retro-link:focus-visible { background: rgba(57,255,20,.12); color: #b5ffc4; }
+body.theme-green .term-brand-link { display: none; }
+body.theme-green .r3labs-retro-link,
+body.theme-green .sungolog-retro-link { display: inline-flex; align-items: center; min-width: 104px; justify-content: center; padding: 0 1rem; border-left: 1px solid #27833f; color: #72ff91; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-shadow: 0 0 8px rgba(114,255,145,.5); }
+body.theme-green .r3labs-retro-link:hover, body.theme-green .r3labs-retro-link:focus-visible,
+body.theme-green .sungolog-retro-link:hover, body.theme-green .sungolog-retro-link:focus-visible { background: rgba(57,255,20,.12); color: #b5ffc4; }
 body.theme-green .term-id { flex: 1; }
 body.theme-green .term-id > .dots { border-right: 0; }
 body.theme-green .term-out { padding: 1.2rem 1.1rem .8rem; background-image: linear-gradient(90deg, #1f7d37 0 3px, transparent 3px); mask-image: none; }
