@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/terminal.css?v=4">
+  <link rel="stylesheet" href="/terminal.css?v=8">
 </head>
 <body class="terminal-booting">
   <noscript><style>body::before{display:none!important}#fallback-nav{display:flex!important}</style></noscript>
@@ -38,7 +38,13 @@
         </a>
       </div>
       <nav class="term-channels" aria-label="mario0318 channels">
-        <a href="/sungolog/" aria-label="Read sungolog v.3.1">sungolog</a>
+        <a class="term-brand-link" href="/sungolog/" aria-label="Read sungolog v.3.1">
+          <picture class="term-brand">
+            <source type="image/webp" srcset="/assets/sungolog-logo-96.webp 1x, /assets/sungolog-logo-192.webp 2x">
+            <img class="term-brand-img" src="/assets/sungolog-logo-96.png" width="286" height="96" alt="SUNGOLOG" decoding="async" fetchpriority="high">
+          </picture>
+        </a>
+        <a class="sungolog-retro-link" href="/sungolog/" aria-label="Read sungolog v.3.1">SUNGOLOG</a>
         <a class="raul3-logo-link" href="https://raul3.com" aria-label="R3 Labs on raul3.com"><img class="raul3-logo" src="https://raul3.com/assets/brand/r3-logo.png?v=20260708-nobox" alt="R3labs"></a>
         <a class="r3labs-retro-link" href="https://raul3.com">R3LABS</a>
       </nav>
