@@ -430,24 +430,35 @@ const THEMES = { gray: { cls: null, color: '#0a0c0f' }, blue: { cls: 'theme-blue
 const THEME_KEY = 'm318.theme';
 
 function readSavedTheme() {
-  try { const saved = localStorage.getItem(THEME_KEY); return THEMES[saved] ? saved : 'gray'; } catch { return 'gray'; }
+  try { const saved = localStorage.getItem(THEME_KEY); return Object.hasOwn(THEMES, saved) ? saved : 'gray'; } catch { return 'gray'; }
 }
 function saveTheme(theme) {
   try { localStorage.setItem(THEME_KEY, theme); } catch {}
 }
+let themeSwitchDone = null;
 function applyTheme(theme, { animate } = {}) {
-  if (!THEMES[theme]) theme = 'gray';
+  if (!Object.hasOwn(THEMES, theme)) theme = 'gray';
   const body = document.body;
   for (const t of Object.values(THEMES)) if (t.cls) body.classList.remove(t.cls);
   if (THEMES[theme].cls) body.classList.add(THEMES[theme].cls);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEMES[theme].color);
   document.querySelectorAll('.dot-button').forEach((item) => item.setAttribute('aria-pressed', item.dataset.theme === theme ? 'true' : 'false'));
-  if (animate && el.term) {
+  if (!el.term) return;
+  // One-shot switch animation (neon glitch-in, CRT power-on). Child .line
+  // animations bubble animationend too, so only the frame's own event counts.
+  if (themeSwitchDone) { el.term.removeEventListener('animationend', themeSwitchDone); themeSwitchDone = null; }
+  el.term.classList.remove('theme-switch');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!animate || reduced || !THEMES[theme].cls) return;
+  void el.term.offsetWidth; // restart the animation if it was mid-run
+  themeSwitchDone = (event) => {
+    if (event.target !== el.term) return;
     el.term.classList.remove('theme-switch');
-    void el.term.offsetWidth; // restart the one-shot switch animation
-    el.term.classList.add('theme-switch');
-    el.term.addEventListener('animationend', () => el.term.classList.remove('theme-switch'), { once: true });
-  }
+    el.term.removeEventListener('animationend', themeSwitchDone);
+    themeSwitchDone = null;
+  };
+  el.term.addEventListener('animationend', themeSwitchDone);
+  el.term.classList.add('theme-switch');
 }
 
 // ---------------------------------------------------------------- boot

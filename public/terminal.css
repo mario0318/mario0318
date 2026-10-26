@@ -272,7 +272,8 @@ body.terminal-ready::before {
   margin: 0;
   min-height: 1.35em;
   position: relative;
-  animation: line-in var(--t-med) var(--ease) both;
+  /* backwards, not both: once revealed the line carries no clip-path at all. */
+  animation: line-in var(--t-med) var(--ease) backwards;
 }
 .line.dim { color: var(--text-dim); }
 .line.help-text {
@@ -293,7 +294,7 @@ body.terminal-ready::before {
   right: calc(100% + 1rem);
   color: var(--dot-3);
 }
-.line.shiver { animation: line-in var(--t-med) var(--ease) both, shiver var(--t-fast) var(--ease) 2; }
+.line.shiver { animation: line-in var(--t-med) var(--ease) backwards, shiver var(--t-fast) var(--ease) 2; }
 
 @keyframes line-in {
   /* Negative insets at rest: the reveal must not clip gutter markers (left of
@@ -370,7 +371,7 @@ body.terminal-ready::before {
   transition: color var(--t-fast) var(--ease), text-shadow var(--t-fast) var(--ease);
 }
 #cmd:focus { outline: none; }
-#cmd::placeholder { color: var(--text-ghost); }
+#cmd::placeholder { color: #828896; }
 #cmd.cmd-token-command {
   color: var(--cmd-green);
   text-shadow: 0 0 12px color-mix(in srgb, var(--cmd-green) 40%, transparent);
@@ -694,7 +695,7 @@ body.theme-blue::after { content: ""; position: fixed; inset: -42px; pointer-eve
 body.theme-blue .term { position: relative; z-index: 1; margin: clamp(.45rem, 1.2vw, 1rem); width: auto; height: calc(100dvh - clamp(.9rem, 2.4vw, 2rem)); max-height: calc(100dvh - clamp(.9rem, 2.4vw, 2rem)); padding-inline: clamp(.75rem, 2.5vw, 2.4rem); border: 1px solid #31537b; border-radius: 0; background: linear-gradient(135deg, rgba(5,7,17,.94), rgba(10,16,32,.87)); box-shadow: 0 0 0 1px rgba(255,79,216,.2), 0 0 34px rgba(85,231,255,.16), inset 0 0 58px rgba(255,79,216,.04); }
 /* HUD brackets on the frame corners: cyan top-left/bottom-right, magenta the other pair. */
 body.theme-blue .term::before {
-  content: ""; position: absolute; inset: -1px; pointer-events: none; z-index: 2;
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
   background:
     linear-gradient(var(--neon-c), var(--neon-c)) top left / 26px 2px no-repeat,
     linear-gradient(var(--neon-c), var(--neon-c)) top left / 2px 26px no-repeat,
@@ -704,7 +705,6 @@ body.theme-blue .term::before {
     linear-gradient(var(--neon-m), var(--neon-m)) bottom left / 2px 26px no-repeat,
     linear-gradient(var(--neon-c), var(--neon-c)) bottom right / 26px 2px no-repeat,
     linear-gradient(var(--neon-c), var(--neon-c)) bottom right / 2px 26px no-repeat;
-  filter: drop-shadow(0 0 6px rgba(85,231,255,.55));
 }
 body.theme-blue .term-head { position: relative; min-height: 56px; border-bottom-color: #395981; background: linear-gradient(90deg, rgba(85,231,255,.13), transparent 32%, rgba(255,79,216,.1)); }
 body.theme-blue .term-head::before { content: "M318//3030"; display: flex; align-items: center; padding-right: 1.2rem; color: var(--neon-c); font-size: 10px; font-weight: 700; letter-spacing: .19em; white-space: nowrap; text-shadow: 0 0 8px rgba(85,231,255,.6); }
@@ -717,6 +717,7 @@ body.theme-blue .term-session { letter-spacing: .12em; text-transform: uppercase
 body.theme-blue .raul3-logo-link,
 body.theme-blue .term-brand-link { padding: .4rem .6rem; margin: 0 .35rem 0 0; border: 1px solid rgba(85,231,255,.36); background: rgba(5,7,17,.42); clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px)); transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease); }
 body.theme-blue .term-brand-link { border-color: rgba(255,79,216,.4); }
+body.theme-blue .raul3-logo-link:focus-visible, body.theme-blue .term-brand-link:focus-visible { outline: 2px solid var(--neon-m); outline-offset: -4px; }
 body.theme-blue .raul3-logo-link:hover, body.theme-blue .raul3-logo-link:focus-visible,
 body.theme-blue .term-brand-link:hover, body.theme-blue .term-brand-link:focus-visible { border-color: var(--neon-c); background: rgba(85,231,255,.08); }
 body.theme-blue .raul3-logo { height: 38px; }
@@ -732,9 +733,11 @@ body.theme-blue .line.echo::before { content: "▸"; color: var(--neon-y); font-
 body.theme-blue .ps1-char, body.theme-blue .line.echo-command { color: var(--neon-y); text-shadow: -1px 0 rgba(255,79,216,.55), 1px 0 rgba(85,231,255,.55), 0 0 10px rgba(255,202,99,.6); }
 body.theme-blue .line.echo-interactive { color: var(--neon-m); text-shadow: 0 0 10px rgba(255,79,216,.5); }
 body.theme-blue .term-prompt { border-color: var(--neon-c); border-radius: 0; clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px)); box-shadow: 0 0 15px rgba(85,231,255,.22), inset 0 0 12px rgba(255,79,216,.08); transition: box-shadow var(--t-med) var(--ease); }
-body.theme-blue .term-prompt:focus-within { box-shadow: 0 0 22px rgba(85,231,255,.34), inset 0 0 16px rgba(255,79,216,.14); }
+/* clip-path removes anything drawn outside the polygon, so focus is shown inside it. */
+body.theme-blue .term-prompt:focus-within { border-color: var(--neon-m); box-shadow: inset 0 0 0 1px var(--neon-m), inset 0 0 18px rgba(255,79,216,.16); }
 body.theme-blue #cmd { caret-color: var(--neon-m); }
-body.theme-blue .portal { border-radius: 0; border-color: rgba(85,231,255,.5); background: radial-gradient(circle at 100% 0, rgba(255,79,216,.12), transparent 12rem), linear-gradient(145deg, #0d1530, var(--surface) 55%, #070b18); clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px)); box-shadow: 0 0 40px rgba(85,231,255,.18); }
+body.theme-blue #cmd::placeholder, body.theme-green #cmd::placeholder { color: var(--text-dim); }
+body.theme-blue .portal { border-radius: 0; border-color: rgba(85,231,255,.5); background: radial-gradient(circle at 100% 0, rgba(255,79,216,.12), transparent 12rem), linear-gradient(145deg, #0d1530, var(--surface) 55%, #070b18); clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px)); box-shadow: inset 0 0 0 1px rgba(85,231,255,.25), inset 0 0 40px rgba(85,231,255,.06); }
 body.theme-blue .portal h2 { color: var(--neon-c); letter-spacing: .2em; }
 body.theme-blue .portal h2::before { content: "//  "; color: var(--neon-m); }
 body.theme-blue .p-item { border-radius: 0; }
@@ -763,7 +766,7 @@ body.theme-green .term::before { content: ""; position: absolute; inset: 0; z-in
 body.theme-green .term > * { position: relative; z-index: 1; }
 body.theme-green .term::after { content: ""; position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: .17; background: repeating-linear-gradient(0deg, transparent 0 3px, #72ff91 4px, transparent 5px); mix-blend-mode: screen; }
 /* Rolling refresh band: the slow bright bar real CRTs show on camera. */
-body.theme-green .theme-fx { display: block; position: fixed; left: 0; right: 0; top: 0; height: 22vh; z-index: 4; pointer-events: none; background: linear-gradient(180deg, transparent, rgba(114,255,145,.055) 45%, rgba(114,255,145,.08) 50%, rgba(114,255,145,.055) 55%, transparent); mix-blend-mode: screen; transform: translateY(-25vh); animation: crt-roll 9s linear infinite; }
+body.theme-green .theme-fx { display: block; position: fixed; left: 0; right: 0; top: 0; height: 22vh; z-index: 4; pointer-events: none; background: linear-gradient(180deg, transparent, rgba(114,255,145,.035) 45%, rgba(114,255,145,.05) 50%, rgba(114,255,145,.035) 55%, transparent); transform: translateY(-25vh); will-change: transform; animation: crt-roll 9s linear infinite; }
 body.theme-green .term-head { min-height: 38px; border-bottom-color: #27833f; background: linear-gradient(90deg, rgba(57,255,20,.16), transparent 34%), #061009; }
 /* Power LED + model plate on the right of the header. */
 body.theme-green .term-head::after { content: "● CRT-318  /  SESSION ACTIVE  /  80x25"; display: flex; align-items: center; margin-left: auto; padding: 0 1rem; color: var(--phosphor); font-size: 10px; letter-spacing: .13em; white-space: nowrap; text-shadow: 0 0 6px rgba(57,255,20,.7); }
@@ -785,8 +788,8 @@ body.theme-green .term-prompt { margin: 0 .7rem .7rem; border: 1px solid #27833f
 /* Block cursor: the drawn block shows only while the input is empty; once text
    is typed the real caret takes over, so there's never 2 cursors. */
 body.theme-green #cmd { caret-color: var(--phosphor); caret-shape: block; }
-body.theme-green .term-prompt:has(#cmd:placeholder-shown) #cmd { caret-color: transparent; }
-body.theme-green .term-prompt:has(#cmd:placeholder-shown) .ps1-char::after { content: "█"; margin-left: .15rem; animation: retro-cursor 1s steps(1) infinite; }
+body.theme-green .term-prompt:focus-within:has(#cmd:placeholder-shown) #cmd { caret-color: transparent; }
+body.theme-green .term-prompt:focus-within:has(#cmd:placeholder-shown) .ps1-char::after { content: "█"; margin-left: .15rem; animation: retro-cursor 1s steps(1) infinite; }
 body.theme-green .portal { border-radius: 0; border: 3px double #27833f; background: #031008; box-shadow: 0 0 0 1px #010501, 0 0 40px rgba(57,255,20,.16); }
 /* Title bar in reverse video, like a text-mode dialog. */
 body.theme-green .portal h2 { margin: -1.8rem -1.2rem 1rem; padding: .45rem 1.2rem; background: var(--text); color: #021006; text-shadow: none; letter-spacing: .14em; }
@@ -794,6 +797,7 @@ body.theme-green .portal h2::before { content: "[ "; color: inherit; }
 body.theme-green .portal h2::after { content: " ]"; }
 body.theme-green .portal-close { top: .32rem; color: #021006; z-index: 1; }
 body.theme-green .portal-close:hover { color: #000; }
+body.theme-green .portal-close:focus-visible { outline-color: #021006; }
 body.theme-green .p-item { border-radius: 0; }
 body.theme-green .p-item:hover, body.theme-green .p-item:focus-visible { background: var(--text); color: #021006; border-color: transparent; transform: none; }
 body.theme-green .p-item:hover small, body.theme-green .p-item:focus-visible small { color: #0b3d18; }
@@ -813,6 +817,7 @@ body.panel-open.theme-blue .term,
 body.panel-open.theme-green .term { position: fixed; inset: auto 0 0 0; z-index: 11; margin: 0; width: auto; height: 64px; max-height: 64px; padding: 0 1.25rem; border-width: 1px 0 0; border-radius: 0; animation: none; }
 body.panel-open.theme-blue .term::before { display: none; }
 body.panel-open.theme-green .term::before { border-radius: 0; }
+body.panel-open.theme-green .term::after { position: absolute; }
 body.panel-open.theme-blue .term-prompt,
 body.panel-open.theme-green .term-prompt { margin: .45rem 0 0; padding-block: .6rem; }
 body.panel-open.theme-blue::after { z-index: 0; }
@@ -839,6 +844,9 @@ body.panel-open.theme-blue::after { z-index: 0; }
   body.panel-open.theme-blue .term,
   body.panel-open.theme-green .term { padding: 0 .75rem; }
 }
+@media (max-width: 640px), (pointer: coarse) {
+  body.theme-green .theme-fx { display: none; }
+}
 
 /* ---------- reduced motion: every theme effect holds still ---------- */
 
@@ -847,7 +855,7 @@ body.panel-open.theme-blue::after { z-index: 0; }
   body.theme-blue .term-head::after,
   body.theme-green .theme-fx,
   .term.theme-switch,
-  body.theme-green .term-prompt:has(#cmd:placeholder-shown) .ps1-char::after { animation: none !important; }
+  body.theme-green .term-prompt:focus-within:has(#cmd:placeholder-shown) .ps1-char::after { animation: none !important; }
   body.theme-blue .term-head::after { display: none; }
   body.theme-green .theme-fx { display: none; }
 }
