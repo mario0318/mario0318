@@ -5,13 +5,17 @@ name: deploy
 # OIDC token, Google swaps it for a ~10 min credential scoped to the
 # github-deployer service account. No key files exist anywhere.
 #
-# Inert until the repo variables GCP_WIF_PROVIDER and GCP_DEPLOY_SA are set
-# (scripts/setup-github-deploy.ps1 prints both).
+# The 2 values below came from scripts/setup-github-deploy.ps1. Neither is a
+# secret: the provider only accepts tokens from mario0318/mario0318 on main.
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
+env:
+  GCP_WIF_PROVIDER: projects/242365228416/locations/global/workloadIdentityPools/github/providers/mario0318-repo
+  GCP_DEPLOY_SA: github-deployer@r3-m318.iam.gserviceaccount.com
 
 concurrency:
   group: deploy-mario0318-site
@@ -19,7 +23,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_DEPLOY_SA != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -38,8 +41,8 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v3
         with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account: ${{ vars.GCP_DEPLOY_SA }}
+          workload_identity_provider: ${{ env.GCP_WIF_PROVIDER }}
+          service_account: ${{ env.GCP_DEPLOY_SA }}
 
       - uses: google-github-actions/setup-gcloud@v3
 
