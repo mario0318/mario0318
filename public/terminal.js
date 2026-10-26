@@ -422,6 +422,34 @@ function complete() {
   else if (hits.length > 1) { stagger = 0; print(hits.join('   '), 'dim'); }
 }
 
+// ---------------------------------------------------------------- themes
+
+// data-theme on the dot buttons: gray = default, blue = neon (M318//3030),
+// green = retro CRT. The body class always matches the button name.
+const THEMES = { gray: { cls: null, color: '#0a0c0f' }, blue: { cls: 'theme-blue', color: '#050711' }, green: { cls: 'theme-green', color: '#010501' } };
+const THEME_KEY = 'm318.theme';
+
+function readSavedTheme() {
+  try { const saved = localStorage.getItem(THEME_KEY); return THEMES[saved] ? saved : 'gray'; } catch { return 'gray'; }
+}
+function saveTheme(theme) {
+  try { localStorage.setItem(THEME_KEY, theme); } catch {}
+}
+function applyTheme(theme, { animate } = {}) {
+  if (!THEMES[theme]) theme = 'gray';
+  const body = document.body;
+  for (const t of Object.values(THEMES)) if (t.cls) body.classList.remove(t.cls);
+  if (THEMES[theme].cls) body.classList.add(THEMES[theme].cls);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEMES[theme].color);
+  document.querySelectorAll('.dot-button').forEach((item) => item.setAttribute('aria-pressed', item.dataset.theme === theme ? 'true' : 'false'));
+  if (animate && el.term) {
+    el.term.classList.remove('theme-switch');
+    void el.term.offsetWidth; // restart the one-shot switch animation
+    el.term.classList.add('theme-switch');
+    el.term.addEventListener('animationend', () => el.term.classList.remove('theme-switch'), { once: true });
+  }
+}
+
 // ---------------------------------------------------------------- boot
 
 async function boot() {
@@ -435,15 +463,13 @@ async function boot() {
     .then((data) => { const ip = String(data.ip || '').trim(); if (/^[0-9a-f:.]+$/i.test(ip)) document.querySelector('.ps1-host').textContent = ip; })
     .catch(() => {});
 
+  applyTheme(readSavedTheme(), { animate: false });
   document.querySelectorAll('.dot-button').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const theme = button.dataset.theme;
-      document.body.classList.remove('theme-green', 'theme-gray');
-      if (theme === 'green') document.body.classList.add('theme-green');
-      if (theme === 'blue') document.body.classList.add('theme-gray');
-      document.querySelectorAll('.dot-button').forEach((item) => item.setAttribute('aria-pressed', item === button ? 'true' : 'false'));
+      applyTheme(button.dataset.theme, { animate: true });
+      saveTheme(button.dataset.theme);
       el.cmd.focus();
     });
   });
