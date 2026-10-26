@@ -1,6 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const http = require("node:http");
+const { createSungolog } = require("./lib/sungolog.cjs");
+const sungolog = createSungolog();
 
 const port = Number(process.env.PORT) || 8080;
 const rootDir = path.join(__dirname, "public");
@@ -23,7 +25,7 @@ function resolvePath(urlPath) {
   const normalizedPath = pathname === "/" ? "/index.html" : pathname;
   const candidate = path.normalize(path.join(rootDir, normalizedPath));
 
-  if (!candidate.startsWith(rootDir)) {
+  if (candidate !== rootDir && !candidate.startsWith(rootDir + path.sep)) {
     return null;
   }
 
@@ -254,6 +256,25 @@ const server = http.createServer((request, response) => {
   const pathname = url.split("?")[0];
   const query = url.slice(pathname.length); // "" or "?..."
 
+  if (pathname === "/api/sungolog/config" && request.method === "GET") {
+    const apiKey = env("SUNGOLOG_FIREBASE_API_KEY");
+    sendJson(response, apiKey ? 200 : 503, apiKey ? {
+      apiKey,
+      authDomain: "mario0318-terminal-live.firebaseapp.com",
+      projectId: "mario0318-terminal-live",
+      appId: "1:526649182798:web:a6eed4b37970138f0d911f"
+    } : { error: "Owner sign-in is not configured." });
+    return;
+  }
+
+  if (pathname.startsWith("/api/sungolog/")) {
+    sungolog.handle(request, response).catch(() => {
+      if (!response.headersSent) sendJson(response, 503, { error: "The archive is temporarily unavailable." });
+      else response.end();
+    });
+    return;
+  }
+
   if (request.method === "POST" && pathname === "/api/20q") {
     handleGuess(request, response);
     return;
@@ -275,7 +296,24 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  const filePath = resolvePath(url);
+  if (pathname === "/sungolog" || pathname === "/blog") {
+    redirect(response, `/sungolog/${query}`);
+    return;
+  }
+
+  if (pathname === "/sungolog/") {
+    serveFile(path.join(rootDir, "sungolog", "index.html"), response);
+    return;
+  }
+
+  let filePath;
+  try {
+    filePath = resolvePath(url);
+  } catch {
+    response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Bad Request");
+    return;
+  }
 
   if (!filePath) {
     response.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });

@@ -48,6 +48,12 @@ export async function respond(command, args, ctx) {
 
   const raw = ctx.rawInput.trim();
 
+  // Keep the publication reachable even when an older live registry is loaded.
+  if (/^(sungolog|blog|journal)$/i.test(raw)) {
+    ctx.navigate?.('/sungolog/');
+    return true;
+  }
+
   if (!command) {
     const normalized = raw.toLowerCase().replace(/\s+/g, ' ');
     if (normalized === 'orbit' || normalized === 'open orbit' || normalized === 'three body') {

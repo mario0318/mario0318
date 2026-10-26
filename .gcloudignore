@@ -1,4 +1,13 @@
 .gcloudignore
+#!include:.gitignore
+.env*
+.npmrc
+*.pem
+*.p12
+*.key
+credentials*.json
+application_default_credentials.json
+service-account*.json
 .git
 .gitignore
 admin/
@@ -7,3 +16,7 @@ firebase.json
 firestore.rules
 firebase-debug.log
 public/audio-vault/
+node_modules/
+output/
+test-results/
+tests/
