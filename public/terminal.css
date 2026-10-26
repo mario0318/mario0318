@@ -188,7 +188,7 @@ body.terminal-ready::before {
 /* SUNGOLOG wordmark in the header logo slot. Transparent PNG/WebP, sized by height. */
 .term-brand { display: inline-flex; align-items: center; flex: none; }
 .term-brand-img { display: block; width: auto; height: 34px; max-width: 160px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(255,79,216,.18)); transition: filter var(--t-med) var(--ease); }
-.term-brand-link { display: inline-flex; align-items: center; flex: none; padding: 0 0 0 .8rem; border-left: 1px solid var(--rule); margin-left: .45rem; }
+.term-brand-link { display: inline-flex; align-items: center; flex: none; padding: 0 .8rem 0 0; border-right: 1px solid var(--rule); margin-right: .45rem; }
 .term-brand-link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 .term-brand-link:hover .term-brand-img,
 .term-brand-link:focus-visible .term-brand-img { filter: drop-shadow(0 0 10px rgba(85,231,255,.35)); }
