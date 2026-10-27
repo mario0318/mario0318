@@ -3,6 +3,7 @@
   "commands": [
     {"name":"help","aliases":["?"],"desc":"command index","ui":"text","category":"core","listed":true},
     {"name":"projects","aliases":["work"],"desc":"things that got built","ui":"portal","category":"explore","listed":true},
+    {"name":"sungolog","aliases":["blog","journal"],"desc":"sungolog v.3.1, thoughts and the record","ui":"client-task","category":"explore","listed":true},
     {"name":"play","aliases":["sc","music"],"desc":"play a vault audio clip","ui":"panel","applet":"audio-vault","category":"toys","listed":true},
     {"name":"analemma","aliases":["studio"],"desc":"analemma studio","ui":"panel","applet":"analemma","category":"toys","listed":true},
     {"name":"dots","desc":"mess with the dots","ui":"inline-applet","applet":"dots-lab","category":"toys","listed":false},

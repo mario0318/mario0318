@@ -172,16 +172,16 @@ test('theme dots switch themes without reloading and retain the selected theme',
   const originalUrl = page.url();
 
   await page.getByRole('button', { name: 'Blue futuristic terminal' }).click();
-  await expect(page.locator('body')).toHaveClass(/theme-gray/);
+  await expect(page.locator('body')).toHaveClass(/theme-blue/);
   await expect(page.getByRole('button', { name: 'Blue futuristic terminal' })).toHaveAttribute('aria-pressed', 'true');
   await page.waitForTimeout(900);
   expect(page.url()).toBe(originalUrl);
-  await expect(page.locator('body')).toHaveClass(/theme-gray/);
+  await expect(page.locator('body')).toHaveClass(/theme-blue/);
   await expectNoDocumentOverflow(page);
 
   await runCommand(page, 'help');
   await expect(page.locator('#out')).toContainText('commands:');
-  await expect(page.locator('body')).toHaveClass(/theme-gray/);
+  await expect(page.locator('body')).toHaveClass(/theme-blue/);
 
   await page.getByRole('button', { name: 'Green retro terminal' }).click();
   await expect(page.locator('body')).toHaveClass(/theme-green/);
@@ -194,7 +194,7 @@ test('theme dots switch themes without reloading and retain the selected theme',
   await expectNoDocumentOverflow(page);
 
   await page.getByRole('button', { name: 'Grey default terminal' }).click();
-  await expect(page.locator('body')).not.toHaveClass(/theme-green|theme-gray/);
+  await expect(page.locator('body')).not.toHaveClass(/theme-green|theme-blue/);
   await expect(page.getByRole('button', { name: 'Grey default terminal' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('link', { name: 'R3LABS' })).toBeHidden();
 });
@@ -376,3 +376,34 @@ test('conversational intent beats colliding shell command prefixes', async ({ pa
   await runCommand(page, 'umount');
   await expect(page.locator('#out')).toContainText('umount: operation refused by imaginary kernel.');
 });
+
+test('selected theme survives a reload and updates the browser chrome color', async ({ page }) => {
+  await openTerminal(page, { width: 1280, height: 800 });
+  await page.getByRole('button', { name: 'Green retro terminal' }).click();
+  await expect(page.locator('body')).toHaveClass(/theme-green/);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#term')).toBeVisible();
+  await expect(page.locator('body')).toHaveClass(/theme-green/);
+  await expect(page.getByRole('button', { name: 'Green retro terminal' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#010501');
+  await page.getByRole('button', { name: 'Grey default terminal' }).click();
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#term')).toBeVisible();
+  await expect(page.locator('body')).not.toHaveClass(/theme-green|theme-blue/);
+});
+
+for (const [label, cls] of [['Grey default terminal', null], ['Blue futuristic terminal', 'theme-blue'], ['Green retro terminal', 'theme-green']]) {
+  test(`applet panel keeps the prompt docked in the ${label}`, async ({ page }) => {
+    await openTerminal(page, { width: 1280, height: 800 });
+    await page.getByRole('button', { name: label }).click();
+    if (cls) await expect(page.locator('body')).toHaveClass(new RegExp(cls));
+    await runCommand(page, 'snake');
+    await expect(page.locator('body')).toHaveClass(/panel-open/);
+    await expect(page.locator('#panel')).toBeVisible();
+    const box = await page.locator('#term').boundingBox();
+    const panel = await page.locator('#panel').boundingBox();
+    expect(box.height).toBeLessThanOrEqual(80);
+    expect(box.y + box.height).toBeGreaterThanOrEqual(799);
+    expect(panel.height).toBeGreaterThan(600);
+  });
+}

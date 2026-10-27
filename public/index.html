@@ -14,11 +14,13 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="/terminal.css?v=8">
+  <link rel="stylesheet" href="/terminal.css?v=10">
 </head>
 <body class="terminal-booting">
+  <script>try{var t=localStorage.getItem('m318.theme'),m={blue:['theme-blue','#050711'],green:['theme-green','#010501']};if(Object.prototype.hasOwnProperty.call(m,t)){document.body.classList.add(m[t][0]);document.querySelector('meta[name="theme-color"]').setAttribute('content',m[t][1]);}}catch(e){}</script>
   <noscript><style>body::before{display:none!important}#fallback-nav{display:flex!important}</style></noscript>
   <nav id="fallback-nav" aria-label="Site navigation">
+    <a href="/sungolog/">sungolog v.3.1</a>
     <a href="https://raul3.com">raul3</a>
     <a href="https://github.com/mario0318">github</a>
     <a href="https://dapp.cam">dapp.cam</a>
@@ -37,13 +39,13 @@
         </a>
       </div>
       <nav class="term-channels" aria-label="mario0318 channels">
-        <a class="term-brand-link" href="/" aria-label="SUNGOLOG home">
+        <a class="term-brand-link" href="/sungolog/" aria-label="Read sungolog v.3.1">
           <picture class="term-brand">
             <source type="image/webp" srcset="/assets/sungolog-logo-96.webp 1x, /assets/sungolog-logo-192.webp 2x">
             <img class="term-brand-img" src="/assets/sungolog-logo-96.png" width="286" height="96" alt="SUNGOLOG" decoding="async" fetchpriority="high">
           </picture>
         </a>
-        <a class="sungolog-retro-link" href="/">SUNGOLOG</a>
+        <a class="sungolog-retro-link" href="/sungolog/" aria-label="Read sungolog v.3.1">SUNGOLOG</a>
         <a class="raul3-logo-link" href="https://raul3.com" aria-label="R3 Labs on raul3.com"><img class="raul3-logo" src="https://raul3.com/assets/brand/r3-logo.png?v=20260708-nobox" alt="R3labs"></a>
         <a class="r3labs-retro-link" href="https://raul3.com">R3LABS</a>
       </nav>
@@ -70,6 +72,8 @@
     </header>
     <div id="panel-mount"></div>
   </section>
+
+  <div class="theme-fx" aria-hidden="true"></div>
 
   <script type="module" src="/terminal.js"></script>
 </body>

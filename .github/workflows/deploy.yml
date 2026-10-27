@@ -46,13 +46,33 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v3
 
-      # Flags mirror deploy-mario0318.ps1 so the 2 deploy paths never disagree.
-      # --allow-unauthenticated is intentionally omitted: the service is already
-      # public, and the deployer role can't (and shouldn't) change IAM policy.
-      - name: deploy to Cloud Run
-        run: gcloud run deploy mario0318-site --source . --region us-central1 --project r3-m318 --platform managed --memory 256Mi --min-instances 0 --max-instances 1 --concurrency 80 --no-cpu-boost --quiet
+      # Flags mirror scripts/deploy-sungolog.ps1 (512Mi, concurrency 4, 300s) so
+      # no deploy path shrinks the archive's memory headroom. Env vars are kept
+      # as-is (no --set-env-vars). --allow-unauthenticated is omitted on purpose:
+      # the service is already public and the deployer can't change IAM policy.
+      #
+      # Production traffic may be pinned to a specific revision (deploy-sungolog
+      # does that), so a plain deploy would never go live. Instead: deploy with
+      # no traffic under a tag, health-check that exact revision, then promote.
+      - name: deploy candidate (no traffic)
+        run: gcloud run deploy mario0318-site --source . --region us-central1 --project r3-m318 --platform managed --memory 512Mi --min-instances 0 --max-instances 1 --concurrency 4 --timeout 300 --no-cpu-boost --no-traffic --tag ci --quiet
 
-      - name: smoke check
+      - name: health check candidate
+        run: |
+          url=$(gcloud run services describe mario0318-site --region us-central1 --project r3-m318 --format=json | jq -r '.status.traffic[] | select(.tag=="ci") | .url')
+          echo "candidate: $url"
+          test -n "$url"
+          for path in / /sungolog/ /api/sungolog/status; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url$path")
+            echo "$path -> $code"
+            test "$code" = "200"
+          done
+          curl -s "$url/api/sungolog/status" | jq -e '.configured == true' > /dev/null
+
+      - name: promote to 100% traffic
+        run: gcloud run services update-traffic mario0318-site --region us-central1 --project r3-m318 --to-latest --quiet
+
+      - name: smoke check production
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' https://mario0318.com/)
           echo "mario0318.com -> $code"
