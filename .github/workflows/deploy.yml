@@ -55,11 +55,11 @@ jobs:
       # does that), so a plain deploy would never go live. Instead: deploy with
       # no traffic under a tag, health-check that exact revision, then promote.
       - name: deploy candidate (no traffic)
-        run: gcloud run deploy mario0318-site --source . --region us-central1 --project r3-m318 --platform managed --memory 512Mi --min-instances 0 --max-instances 1 --concurrency 4 --timeout 300 --no-cpu-boost --no-traffic --tag ci --quiet
+        run: gcloud run deploy mario0318-site --source . --region us-central1 --project r3-m318 --platform managed --memory 512Mi --min-instances 0 --max-instances 1 --concurrency 4 --timeout 300 --no-cpu-boost --no-traffic --tag ci-candidate --quiet
 
       - name: health check candidate
         run: |
-          url=$(gcloud run services describe mario0318-site --region us-central1 --project r3-m318 --format=json | jq -r '.status.traffic[] | select(.tag=="ci") | .url')
+          url=$(gcloud run services describe mario0318-site --region us-central1 --project r3-m318 --format=json | jq -r '.status.traffic[] | select(.tag=="ci-candidate") | .url')
           echo "candidate: $url"
           test -n "$url"
           for path in / /sungolog/ /api/sungolog/status; do
