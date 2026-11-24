@@ -116,6 +116,17 @@
     const target = event.target.closest('[data-r3-ad-settings]');
     if (target) { event.preventDefault(); show(); }
   });
+  // A full navigation unloads the SDK before entering a page without advertising.
+  document.addEventListener('click', event => {
+    if (!started || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[href]');
+    if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
+    const destination = new URL(link.href, location.href);
+    if (destination.origin !== location.origin || (destination.pathname === location.pathname && destination.search === location.search)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    location.assign(destination.href);
+  }, true);
   window.addEventListener('storage', event => { if (event.key === key && event.newValue !== 'on' && started) location.reload(); });
   if (!blocked) start();
 })();
